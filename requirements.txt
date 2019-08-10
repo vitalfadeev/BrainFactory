@@ -1,0 +1,13 @@
+wheel
+django
+django-allauth
+django-widget-tweaks
+#django-viewflow
+django-material
+#django-datatable-view
+mysqlclient
+SQLAlchemy
+jsonfield
+xlrd
+pandas
+numpy

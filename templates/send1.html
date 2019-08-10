@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load socialaccount %}
+{% load widget_tweaks %}
+{% load material_form %}
+{% block title %} Sign in {% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col offset-s2 s8">
+        <h4>Send data</h4>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% form form=form %}{% endform %}
+            <br>
+            <div class="right-align">
+                <button type="submit" name="_submit" class="btn">Next page</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

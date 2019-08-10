@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load account %}
+{% load socialaccount %}
+{% block title %} my {% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+{% endblock extracss %}
+
+{% block content %}
+<h4>Public data</h4>
+
+<table class="highlight" id="my-data">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Received DateTime</th>
+        <th>Description</th>
+        <th>Status (waiting, done)</th>
+        <th>Names of columns input</th>
+        <th>Names of columns output</th>
+        <th>Acuracy</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in public_batches %}
+    <tr class="cursor-pointer">
+        <td>{{ item.Batch_Id }}</td>
+        <td>{{ item.Project_Name }}</td>
+        <td>{{ item.Batch_Received_DateTime|date:'Y-m-d H:i' }}</td>
+        <td>{{ item.Project_Description }}</td>
+        <td>-</td>
+        <td>{{ item.AnalysisSource_ColumnsNameInput }}</td>
+        <td>{{ item.AnalysisSource_ColumnsNameOutput }}</td>
+        <td>{{ item.Solving_Acuracy }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock content %}
+
+{% block extrajs %}
+<script type="text/javascript">
+    $("#my-data").on('click', function(e) {
+        if (e.target.tagName == 'TD') {
+            var tr = e.target.parentNode;
+            var td1 = $(tr).find('TD').first();
+            var batch_id = td1.text();
+            window.location.href = '/view/' + batch_id;
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready( function () {
+    $('#my-data').DataTable();
+} );
+</script>
+{% endblock extrajs %}

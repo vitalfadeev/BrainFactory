@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load account %}
+{% load socialaccount %}
+{% block title %} Sign in {% endblock %}
+{% block content %}
+
+
+<div class="row">
+    <div class="col s12 center-align">
+        <div>
+            <h4>Want to evaluate machine learning ?</h4>
+            <h4>Want to do a machine learning project without programming ?</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col s4 right-align">
+        <h5>How it works >></h5>
+    </div>
+    <div class="col s8">
+        <ol>
+            <li>You <b>send your data sheet</b> to ixioo and leave blank some area</li>
+            <li><b>Ixioo</b> analyze data, buld a model and then predict values </li>
+            <li>You <b>receive data</b> sheet with predicted values</li>
+        </ol>
+    </div>
+</div>
+
+
+{% if user.is_authenticated %}
+{% else %}
+<div class="row">
+
+    <div class="col s12 center-align">
+        <div class="">
+            <a href="{% url 'account_login' %}" class="btn s4">
+                Login
+            </a>
+
+            <a href="{% url 'account_signup' %}" class="btn s4">
+                Registration
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endif %}
+
+{% endblock %}

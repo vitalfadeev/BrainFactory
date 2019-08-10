@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load account %}
+{% load socialaccount %}
+{% load staticfiles %}
+{% block title %} my {% endblock %}
+
+{% block extracss %}
+{% endblock extracss %}
+
+{% block extrajs %}
+{% endblock extrajs %}
+
+
+{% block content %}
+<br>
+<div class="row">
+    <div class="col s12 right-align">
+        <a href="{% url 'send' %}" class="btn btn-outline-primary">Send new job</a>
+    </div>
+</div>
+
+<table class="highlight responsive-table" id="my-data">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Received DateTime</th>
+        <th>Description</th>
+        <th>Status (waiting, done)</th>
+        <th>Names of columns input</th>
+        <th>Names of columns output</th>
+        <th>Acuracy</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in query_results %}
+    <tr class="cursor-pointer" data-id="{{ item.Batch_Id }}">
+        <td>{{ item.Project_Name }}</td>
+        <td>{{ item.Batch_Received_DateTime|date:'Y-m-d H:i' }}</td>
+        <td>{{ item.Project_Description }}</td>
+        <td>-</td>
+        <td>{{ item.AnalysisSource_ColumnsNameInput }}</td>
+        <td>{{ item.AnalysisSource_ColumnsNameOutput }}</td>
+        <td>{{ item.Solving_Acuracy }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#my-data").on('click', function(e) {
+            if (e.target.tagName == 'TD') {
+                var tr = e.target.parentNode;
+                var batch_id = tr.getAttribute('data-id');
+                window.location.href = '/view/' + batch_id;
+            }
+        });
+    });
+</script>
+
+{% endblock content %}

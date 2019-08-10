@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} view {% endblock %}
+{% block content %}
+
+
+<h4>Name: {{ batch.Project_Name }}</h4>
+<div class="row">
+    <div class="col-2">Received DateTime:</div>
+    <div> {{ batch.Batch_Received_DateTime|date:'Y-m-d H:i' }}</div>
+</div>
+<div class="row">
+    <div class="col-2">Description:</div>
+    <div> {{ batch.Project_Description }}</div>
+</div>
+<div class="row">
+    <div class="col-2">Status:</div>
+    <div></div>
+</div>
+<div class="row mb-1">
+    <div class="col-2">Version:</div>
+    <div></div>
+</div>
+
+<!-- Raw -->
+<!-- View first 5 lines and last 5 lines of csv -->
+<table class="responsive-table">
+    <thead>
+    <tr>
+    {% for name in data_titles %}
+        <th>{{ name }}</th>
+    {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in data_head %}
+    <tr>
+        {% for dada in row %}
+            <td>{{ dada }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+
+    <tr>
+        {% for row in data_titles %}
+        <td>...</td>
+        {% endfor %}
+    </tr>
+
+    {% for row in data_tail %}
+    <tr>
+        {% for dada in row %}
+            <td>{{ dada }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

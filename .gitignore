@@ -1,0 +1,8 @@
+.idea/
+bak/
+core/batchs/migrations/
+core/local_setting.py
+media/*
+venv/*
+*.sqlite3
+*.pyc
