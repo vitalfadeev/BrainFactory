@@ -6,3 +6,6 @@ media/*
 venv/*
 *.sqlite3
 *.pyc
+__pycache__/
+cote/__pycache__/
+cote/batchs/__pycache__/
