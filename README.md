@@ -16,4 +16,5 @@
         - show errors
 
  
-- phase 3 (evaluating)
+- phase 3 (train parameters)
+
