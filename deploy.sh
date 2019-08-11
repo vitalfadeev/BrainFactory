@@ -1,4 +1,4 @@
-#!/bin/#!/usr/bin/env sh
+#!/bin/bash
 
 source venv/bin/activate
 
