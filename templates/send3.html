@@ -37,15 +37,18 @@ $(document).ready(function() {
     $('select').formSelect({
         'dropdownOptions':{
             'onOpenStart': function(e) {
-                var tips = JSON.parse( $(e.parentNode).find('select').first().attr('data-tooltips') );
-                $(e.parentNode)
-                    .find('li')
-                        .each(function(i, li) {
-                            $(li)
-                                .addClass('tooltipped')
-                                .attr({ 'data-position': "right", 'data-tooltip': tips[i] })
-                                .tooltip({exitDelay:0});
-                        });
+                var tips_json = $(e.parentNode).find('select').first().attr('data-tooltips');
+                if (tips) {
+                    var tips = JSON.parse( tips_json );
+                    $(e.parentNode)
+                        .find('li')
+                            .each(function(i, li) {
+                                $(li)
+                                    .addClass('tooltipped')
+                                    .attr({ 'data-position': "right", 'data-tooltip': tips[i] })
+                                    .tooltip({exitDelay:0});
+                            });
+                }
             }
         }
     });
