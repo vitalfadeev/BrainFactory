@@ -47,10 +47,8 @@ class Batchs(models.Model):
     Project_Name                            = models.CharField(max_length=255)
     Project_Description                     = models.TextField(default="", blank=True)
     Project_IsPublic                        = models.BooleanField(default=False)
-    #Project_SourceMode                      = models.CharField(max_length=255, default="TRAIN", choices=PROJECT_SOURCEMODE_CHOICES)
     Project_FileSourcePathName              = models.FileField(upload_to=uploads_directory_path,
                                                                validators=[validate_file_extension])
-    #Project_DBSourceDatabaseTable           = models.CharField(max_length=255, default="") # DBFile;table
     Project_ColumnsDescription              = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # [,]
     ProjectSource_ColumnsNameForceInput     = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # [,]
     ProjectSource_ColumnsNameForceOutput    = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # [,]
@@ -58,18 +56,15 @@ class Batchs(models.Model):
     AnalysisSource_ColumnsNameInput         = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # [,]
     AnalysisSource_ColumnsNameOutput        = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # [,]
     AnalysisSource_ColumnType               = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # [,]
-    #AnalysisSource_CountLinesForTraining    = models.TextField(default="")
-    #AnalysisSource_CountLinesForPrediction  = models.TextField(default="")
     AnalysisSource_Errors                   = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default={}) # [,]
     AnalysisSource_Warnings                 = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default={}) # [,]
 
     ParameterCNN_SettingAuto                = models.BooleanField(default=True)
     ParameterCNN_Loss                       = models.CharField(max_length=255, default=PARAMETERCNN_LOSS[0][0], choices=PARAMETERCNN_LOSS, help_text="")
     ParameterCNN_Optimizer                  = models.CharField(max_length=255, default=PARAMETERCNN_OPTIMIZER[0][0], choices=PARAMETERCNN_OPTIMIZER)
-    ParameterCNN_Shape                      = models.CharField(max_length=255, blank=True, null=True)
+    ParameterCNN_Shape                      = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # []
 
     Solving_DateTimeSending                 = models.DateTimeField(auto_now=False, blank=True, null=True)
-    #Solving_CSVSolvedMergedFilePath         = models.FileField(upload_to=uploads_directory_path, null=True)
     Solving_DelayElapsed                    = models.IntegerField(default=0)
     Solving_Acuracy                         = models.BooleanField(default=False)
     Solving_Loss                            = models.TextField(blank=True, null=True)
@@ -94,11 +89,13 @@ class BatchInput:
 
             titles = result.keys()
 
+            titles.pop(0) # remove PK
+
             return titles
 
 
     @classmethod
-    def get_head(cls, batch_id, limit=5):
+    def get_head(cls, batch_id, limit=5, without_pk=True):
         from sqlalchemy.sql import text
         from . import helpers
 
@@ -110,7 +107,10 @@ class BatchInput:
                 """.format(table))
             result = con.execute(sql, limit=limit)
 
-            rows = [row for row in result]
+            if without_pk:
+                rows = [row[1:] for row in result] # without PK
+            else:
+                rows = [row for row in result]
 
             return rows
 

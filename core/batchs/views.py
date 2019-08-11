@@ -103,62 +103,46 @@ def send2(request, batch_id):
         form = forms.SendForm2(request.POST, request.FILES, instance=batch)
 
         if form.is_valid():
-            batch = form.save(commit=False)
-            batch.save()
-            return HttpResponseRedirect('/send2/{}'.format(batch.Batch_Id))
+            form.save()
 
+            if 'btn_next' in request.POST:
+                return HttpResponseRedirect('/send3/{}'.format(batch.Batch_Id))
         else:
-            return HttpResponseRedirect('/send2/{}'.format(batch.Batch_Id))
+            print(form.errors)
 
-    # if a GET (or any other method) we'll create a blank form
+    # GET
     else:
-        def as_dict(d):
-            return d if isinstance(d, dict) else {}
+        form = forms.SendForm2(instance=batch)
 
-        def as_list(d):
-            return d if isinstance(d, list) else []
+    # render
+    titles = models.BatchInput.get_titles(batch.Batch_Id)
 
-        form    = forms.SendForm2(instance=batch)
-        colsin  = batch.AnalysisSource_ColumnsNameInput
-        colsout = batch.AnalysisSource_ColumnsNameOutput
-        cols    = list(colsin) + list(colsout)
+    desc_fields   = form.get_desc_fields
+    inout_fields  = form.get_inout_fields
+    errors        = [batch.AnalysisSource_Errors.get(t, "") for t in titles]
+    error_dataset = batch.AnalysisSource_Errors.get("DATASET", "")
+    warnings      = [batch.AnalysisSource_Warnings.get(t, "") for t in titles]
+    types         = [batch.AnalysisSource_ColumnType.get(t, "") for t in titles]
+    head          = models.BatchInput.get_head(batch.Batch_Id, 5)
 
-        errs    = [as_dict(batch.AnalysisSource_Errors).get(c, "")   for c in cols]
-        warn    = [as_dict(batch.AnalysisSource_Warnings).get(c, "") for c in cols]
-        types   = [as_dict(batch.AnalysisSource_ColumnType).get(c, "") for c in cols]
-        has_errs = any(errs)
-        has_warn = any(warn)
-        dataset_err = as_dict(batch.AnalysisSource_Errors).get("DATASET", "")
+    template = loader.get_template('send2.html')
 
-        ttls    = models.BatchInput.get_titles(batch.Batch_Id)
-        data    = models.BatchInput.get_head(batch.Batch_Id, 5)
+    context = {
+        'form': form,
+        'batch': batch,
+        'titles': titles,
+        'desc_fields': desc_fields,
+        'inout_fields': inout_fields,
+        'has_errors': any(errors),
+        'errors': errors,
+        'error_dataset': error_dataset,
+        'has_warnings': any(warnings),
+        'warnings': warnings,
+        'types': types,
+        'head': head,
+    }
 
-        # reorder fields
-        head    = []
-        for row in data:
-            r = []
-            for c in cols:
-                try: i = ttls.index(c)
-                except ValueError: i = ttls.index('"' + c + '"')
-                r.append(row[i])
-            head.append(r)
-
-        template = loader.get_template('send2.html')
-
-        context = {
-            'form': form,
-            'batch': batch,
-            'cols': cols,
-            'head': head,
-            'errs': errs,
-            'warn': warn,
-            'types': types,
-            'dataset_err': dataset_err,
-            'has_errs': has_errs,
-            'has_warn': has_warn,
-        }
-
-        return HttpResponse(template.render(context, request))
+    return HttpResponse(template.render(context, request))
 
 
 @login_required
@@ -180,24 +164,24 @@ def send3(request, batch_id):
         form = forms.SendForm3(request.POST, request.FILES, instance=batch)
 
         if form.is_valid():
-            batch = form.save(commit=False)
-            batch.save()
+            form.save()
             return HttpResponseRedirect('/send3/{}'.format(batch.Batch_Id))
 
         else:
+            print(form.errors)
             return HttpResponseRedirect('/send3/{}'.format(batch.Batch_Id))
 
     # if a GET (or any other method) we'll create a blank form
     else:
         form    = forms.SendForm3(instance=batch)
-        template = loader.get_template('send3.html')
 
-        context = {
-            'form': form,
-            'batch': batch,
-        }
-
-        return HttpResponse(template.render(context, request))
+    # render
+    template = loader.get_template('send3.html')
+    context = {
+        'form': form,
+        'batch': batch,
+    }
+    return HttpResponse(template.render(context, request))
 
 
 #@login_required

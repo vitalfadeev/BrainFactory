@@ -13,98 +13,70 @@
         <form method="POST" enctype="multipart/form-data" id="send2-form">
             {% csrf_token %}
 
-            {% form form=form %}{% endform %}
-
-            {% if dataset_err %}
+            {% if error_dataset %}
             <div id="dataset-error" class="card-panel red lighten-5">
                 <dic>
-                    {{ dataset_err }}
+                    {{ error_dataset }}
                 </dic>
             </div>
             {% endif %}
 
-            <table id="data-desc" class="responsive-table">
+            <table class="responsive-table">
                 <thead>
-                <tr>
-                    {% for c in cols %}
-                    <th>{{ c }}</th>
+                <tr id="row-titles">
+                    {% for t in titles %}
+                    <th>{{ t }}</th>
                     {% endfor %}
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr id="row-desc">
-                    {% for c in cols %}
-                    <td>
-                        {% if batch.Batch_Action == "TRAIN" %}
-                        <input type="text">
+                    {% for f in desc_fields %}
+                    <td>{{ f }}</td>
+                    {% endfor %}
+                </tr>
+
+                {% if has_errors %}
+                <tr id="row-errors">
+                    {% for e in errors %}
+                        {% if e %}
+                            <td class="red lighten-3">{{ e }}</td>
                         {% else %}
-                        <input type="text" disabled>
+                            <td class="">{{ e }}</td>
                         {% endif %}
-                    </td>
-                    {% endfor %}
-                </tr>
-
-                {% if has_errs %}
-                <tr id="row-error">
-                    {% for v in errs %}
-                    {% if v %}
-                    <td class="red lighten-5"> {{ v }} </td>
-                    {% else %}
-                    <td></td>
-                    {% endif %}
                     {% endfor %}
                 </tr>
                 {% endif %}
 
-                {% if has_warn %}
-                <tr id="row-warn">
-                    {% for v in warn %}
-                    {% if v %}
-                    <td class="yellow lighten-3">{{ v }}</td>
-                    {% else %}
-                    <td></td>
-                    {% endif %}
+                {% if has_warnings %}
+                <tr id="row-warnings">
+                    {% for e in warnings %}
+                        {% if e %}
+                        <td class="yellow lighten-3">{{ e }}</td>
+                        {% else %}
+                        <td class="">{{ e }}</td>
+                        {% endif %}
                     {% endfor %}
                 </tr>
                 {% endif %}
 
-                <tr id="row-action">
-                    {% for c in cols %}
-                    <td>
-                        {% if batch.Batch_Action == "TRAIN" %}
-                         <div class="input-field col s12">
-                            <select>
-                              <option value="" selected> </option>
-                              <option value="INPUT">Input</option>
-                              <option value="OUTPUT">Output</option>
-                            </select>
-                         </div>
-                         {% else %}
-                         <div class="input-field col s12">
-                            <select disabled>
-                              <option value="" selected> </option>
-                              <option value="INPUT">Input</option>
-                              <option value="OUTPUT">Output</option>
-                            </select>
-                         </div>
-                         {% endif %}
-                    </td>
+                <tr id="row-in-out">
+                    {% for f in inout_fields %}
+                    <td>{{ f }}</td>
                     {% endfor %}
                 </tr>
 
-                <tr id="row-type">
-                    {% for v in types %}
-                    <td>
-                        {{ v }}
-                    </td>
+                <tr id="row-types">
+                    {% for f in types %}
+                    <td>{{ f }}</td>
                     {% endfor %}
                 </tr>
 
                 {% for row in head %}
-                <tr>
-                    {% for v in row %}
-                    <td>{{ v }}</td>
+                <tr id="row-head">
+                    {% for d in row %}
+                    <td>{{ d }}</td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
@@ -113,13 +85,18 @@
             </table>
 
             <br>
+            <!-- Default submit on Enter pressed --->
+            <div class="hide">
+                <button  type="submit" value="btn_apply"/>
+            </div>
+
             <div class="right-align">
-                <button type="submit" name="_submit" class="btn">Next page</button>
+                <button type="submit" name="btn_next" class="btn">Next page</button>
             </div>
 
             <br>
             <div class="right-align">
-                <button type="submit" name="_submit2" class="btn">Apply changes</button>
+                <button type="submit" name="btn_apply" class="btn">Apply changes</button>
             </div>
         </form>
 
@@ -133,59 +110,4 @@
   });
  </script>
 
- <script>
-$(document).ready(function(){
-    function get_safe(data, i) {
-        return (i < data.length) ? data[i] : '';
-    }
-
-    function set_row_data(rowid, values) {
-        var $tr = $(rowid);
-        $tr
-            .find('input')
-                .each(function(i, inp) {
-                    inp.value = get_safe(values, i);
-                });
-    }
-
-    function set_row_text(rowid, values) {
-        var $tr = $(rowid);
-        $tr
-            .find('td')
-                .each(function(i, inp) {
-                    inp.innerHTML = get_safe(desc, i);
-                });
-    }
-
-    function update_hidden(hidden_id, tableid) {
-        var $table = $(tableid).find('tbody');
-        var $tr = $table.find('tr');
-
-        desc = [];
-
-        $tr
-            .find('input')
-                .each(function(i, inp) {
-                    desc.push(inp.value);
-                });
-
-        var desc_js = JSON.stringify(desc);
-        $(hidden_id).val(desc_js);
-    }
-
-    // init data
-    var cols = JSON.parse( $("#id_AnalysisSource_ColumnsNameInput").val() );
-    var desc = JSON.parse( $("#id_Project_ColumnsDescription").val() );
-    var cotp = JSON.parse( $("#id_AnalysisSource_ColumnType").val() );
-
-    set_row_data("#row-desc", desc);
-    set_row_data("#row-type", cotp);
-
-    //
-    $('#send2-form').on('submit',function(){
-        update_hidden("#id_Project_ColumnsDescription", "#data-desc");
-    });
-  });
-
-</script>
 {% endblock %}
