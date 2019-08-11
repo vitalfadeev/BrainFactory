@@ -127,23 +127,6 @@ class SendForm2(forms.ModelForm):
         return instance
         
 
-SHAPE_CHOICES = (
-    ("DENSE SOFTMAX", "Dense softmax"),
-    ("DENSE ELU", "Dense elu"),
-    ("DENSE SELU", "Dense selu"),
-    ("DENSE SOFTPLUS", "Dense softplus"),
-    ("DENSE SOFTSIGN", "Dense softsign"),
-    ("DENSE RELU", "Dense relu"),
-    ("DENSE TANH", "Dense tanh"),
-    ("DENSE SIGMOID", "Dense sigmoid"),
-    ("DENSE HARD_SIGMOID", "Dense hard_sigmoid"),
-    ("DENSE EXPONENTIAL", "Dense exponential"),
-    ("DENSE LINEAR", "Dense linear"),
-    ("DROPOUT", "Dropout"),
-    ("BATCHNORMALIZATION", "BatchNormalization"),
-)
-
-
 import json
 from material import Layout, Row, Column, Fieldset, Span2, Span3, Span5, Span6, Span10
 class SendForm3(forms.ModelForm):
@@ -199,7 +182,14 @@ class SendForm3(forms.ModelForm):
             fname_n = 'shape_n{}'.format(i)
             fname_c = 'shape_c{}'.format(i)
             self.fields[fname_n] = forms.CharField(label='n', required=False) 
-            self.fields[fname_c] = forms.ChoiceField(choices=SHAPE_CHOICES, label='v', widget=forms.Select)
+            self.fields[fname_c] = forms.ChoiceField(
+                choices=models.two_cols(models.SHAPE_CHOICES),
+                label='v',
+                widget=forms.Select(choices=models.two_cols(models.SHAPE_CHOICES),
+                                              attrs={
+                                                  'data-tooltips': json.dumps(models.last_col(models.SHAPE_CHOICES))
+                                              }),
+            )
             self.initial[fname_n] = initials[i][0] if i < len(initials) else ""
             self.initial[fname_c] = initials[i][1] if i < len(initials) else ""
 

@@ -28,6 +28,7 @@
 .material-tooltip {
     z-index: 99999  !important;
     text-align: left  !important;
+    width: 200px  !important;
 }
 </style>
 
@@ -38,7 +39,7 @@ $(document).ready(function() {
         'dropdownOptions':{
             'onOpenStart': function(e) {
                 var tips_json = $(e.parentNode).find('select').first().attr('data-tooltips');
-                if (tips) {
+                if (tips_json) {
                     var tips = JSON.parse( tips_json );
                     $(e.parentNode)
                         .find('li')

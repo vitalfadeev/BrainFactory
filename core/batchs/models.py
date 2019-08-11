@@ -52,6 +52,41 @@ PARAMETERCNN_OPTIMIZER = [
     ("NADAM"    , "Nadam",      "<i>Nesterov Adam optimizer.<br>Much like Adam is essentially RMSprop with momentum, Nadam is Adam RMSprop with Nesterov momentum.</i>")
 ]
 
+SHAPE_CHOICES = (
+    ("DENSE SOFTMAX"        , "Dense softmax"       , "softmax"),
+    ("DENSE ELU"            , "Dense elu"           , "exponential linear activation: x if x > 0 and alpha * (exp(x)-1) if x < 0."),
+    ("DENSE SELU"           , "Dense selu"          , "scaled exponential unit activation: scale * elu(x, alpha)."),
+    ("DENSE SOFTPLUS"       , "Dense softplus"      , "softplus activation: log(exp(x) + 1)."),
+    ("DENSE SOFTSIGN"       , "Dense softsign"      , "softsign activation: x / (abs(x) + 1)"),
+    ("DENSE RELU"           , "Dense relu"          , "Rectified Linear Unit"),
+    ("DENSE TANH"           , "Dense tanh"          , "With default values, it returns element-wise max(x, 0)."),
+    ("DENSE SIGMOID"        , "Dense sigmoid"       , """
+        Otherwise, it follows: <br>
+        f(x) = max_value for x >= max_value, <br>
+        f(x) = x for threshold <= x < max_value, <br>
+        f(x) = alpha * (x - threshold) otherwise.
+        """),
+    ("DENSE HARD_SIGMOID"   , "Dense hard_sigmoid"  , """
+        Hyperbolic tangent activation function<br>"
+        keras.activations.sigmoid(x)<br>
+        0 if x < -2.5<br>
+        1 if x > 2.5<br>
+        0.2 * x + 0.5 if -2.5 <= x <= 2.5."""),
+    ("DENSE EXPONENTIAL"    , "Dense exponential"   , "Exponential (base e) activation function"),
+    ("DENSE LINEAR"         , "Dense linear"        , "Linear (i.e. identity) activation function"),
+    ("DROPOUT"              , "Dropout"             , """
+        Dropout works by probabilistically removing,<br>
+        or “dropping out,” inputs to a layer, <br>
+        which may be input variables in the data sample <br>
+        or activations from a previous layer. <br>
+        It has the effect of simulating a large number<br>
+        of networks with very different network structure <br>
+        and, in turn, making nodes in the network generally <br>
+        more robust to the inputs."""),
+    ("BATCHNORMALIZATION"   , "BatchNormalization"  , """
+        The layer will transform inputs so that they are standardized, 
+        meaning that they will have a mean of zero and a standard deviation of one."""),
+)
 
 def two_cols(data):
     return [row[:2] for row in data]
