@@ -143,6 +143,8 @@ SHAPE_CHOICES = (
     ("BATCHNORMALIZATION", "BatchNormalization"),
 )
 
+
+import json
 from material import Layout, Row, Column, Fieldset, Span2, Span3, Span5, Span6, Span10
 class SendForm3(forms.ModelForm):
     class Meta:
@@ -157,6 +159,14 @@ class SendForm3(forms.ModelForm):
             "ParameterCNN_Optimizer": "Optimizer",
         }
         widgets = {
+             'ParameterCNN_Optimizer': forms.Select(choices=models.two_cols(models.PARAMETERCNN_OPTIMIZER), 
+                    attrs={
+                        'data-tooltips': json.dumps(models.last_col(models.PARAMETERCNN_OPTIMIZER))
+                    }),
+             'ParameterCNN_Loss': forms.Select(choices=models.two_cols(models.PARAMETERCNN_LOSS), 
+                    attrs={
+                        'data-tooltips': json.dumps(models.last_col(models.PARAMETERCNN_LOSS))
+                    }),
         }
 
     layout = Layout(

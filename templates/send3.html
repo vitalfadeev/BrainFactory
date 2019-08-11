@@ -22,3 +22,33 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extrajs %}
+<style>
+.material-tooltip {
+    z-index: 99999  !important;
+    text-align: left  !important;
+}
+</style>
+
+<script>
+// init selects
+$(document).ready(function() {
+    $('select').formSelect({
+        'dropdownOptions':{
+            'onOpenStart': function(e) {
+                var tips = JSON.parse( $(e.parentNode).find('select').first().attr('data-tooltips') );
+                $(e.parentNode)
+                    .find('li')
+                        .each(function(i, li) {
+                            $(li)
+                                .addClass('tooltipped')
+                                .attr({ 'data-position': "right", 'data-tooltip': tips[i] })
+                                .tooltip({exitDelay:0});
+                        });
+            }
+        }
+    });
+});
+</script>
+{% endblock extrajs %}

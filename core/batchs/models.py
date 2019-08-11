@@ -18,24 +18,46 @@ PROJECT_SOURCEMODE_CHOICES = [
 ]
 
 PARAMETERCNN_LOSS = [
-    ('BINARYCROSSENTROPY', 'BinaryCrossentropy'),
-    ('SQUAREDHINGE', 'SquaredHinge'),
-    ('POISSON', 'Poisson'),
-    ('MEANSQUAREDERROR', 'MeanSquaredError'),
-    ('MEANABSOLUTEERROR', 'MeanAbsoluteError'),
-    ('HUBER', 'Huber'),
-    ('HINGE', 'Hinge'),
-    ('COSINESIMILARITY', 'CosineSimilarity'),
+    ("BINARYCROSSENTROPY"   , "BinaryCrossentropy", """
+        <i>Use this cross-entropy loss<br> 
+        when there are only two label classes<br>
+        assumed to be 0 and 1).<br> 
+        For each example, there should be a single<br>
+        floating-point value per prediction.</i>"
+        """),
+    ("SQUAREDHINGE"         , "SquaredHinge",       "<i>Computes the squared hinge loss<br>y_true values are expected to be -1 or 1. If binary (0 or 1) labels are provided we will convert them to -1 or 1.</i>"),
+    ("POISSON"              , "Poisson",            "<i>Computes the Poisson loss<br>loss = y_pred - y_true * log(y_pred)</i>"),
+    ("MEANSQUAREDERROR"     , "MeanSquaredError",   "<i>Computes the mean of squares of errors between labels and predictions</i>"),
+    ("MEANABSOLUTEERROR"    , "MeanAbsoluteError",  "<i>Computes the mean of absolute difference between labels and predictions</i>"),
+    ("HUBER"                , "Huber",              "<i>Computes the Huber loss<br>0.5 * x^2                  if |x| <= d<br>0.5 * d^2 + d * (|x| - d)  if |x| > d</i>"),
+    ("HINGE"                , "Hinge",              "<i>Computes the hinge loss <br>y_true values are expected to be -1 or 1. If binary (0 or 1) labels are provided we will convert them to -1 or 1.</i>"),
+    ("COSINESIMILARITY"     , "CosineSimilarity",   "<i>Computes the cosine similarity</i>"),
 ]
 
 PARAMETERCNN_OPTIMIZER = [
-    ('SGD', 'SGD'),
-    ('RMSPROP', 'RMSprop'),
-    ('ADADELTA', 'Adadelta'),
-    ('ADAM', 'Adam'),
-    ('ADAMAX', 'Adamax'),
-    ('NADAM', 'Nadam')
+    ("SGD"      , "SGD",        "<i>Stochastic gradient descent optimizer</i>"),
+    ("RMSPROP"  , "RMSprop",    "<i>RMSProp optimizer</i>"),
+    ("ADADELTA" , "Adadelta",   """
+        <i>Adadelta optimizer.<br>
+        Adadelta is a more robust extension<br>
+        of Adagrad that adapts learning rates <br>
+        based on a moving window of gradient updates,<br> 
+        instead of accumulating all past gradients. <br>
+        This way, Adadelta continues learning even <br>
+        when many updates have been done.</i>
+        """
+    ),
+    ("ADAM"     , "Adam",       "<i>Adam optimizer</i>"),
+    ("ADAMAX"   , "Adamax",     "<i>Adamax optimizer", "It is a variant of Adam based on the infinity norm. Default parameters follow those provided in the paper.</i>"),
+    ("NADAM"    , "Nadam",      "<i>Nesterov Adam optimizer.<br>Much like Adam is essentially RMSprop with momentum, Nadam is Adam RMSprop with Nesterov momentum.</i>")
 ]
+
+
+def two_cols(data):
+    return [row[:2] for row in data]
+
+def last_col(data):
+    return [row[-1] for row in data]
 
 class Batchs(models.Model):
     Batch_Id                                = models.AutoField(primary_key=True)
@@ -60,8 +82,8 @@ class Batchs(models.Model):
     AnalysisSource_Warnings                 = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default={}) # [,]
 
     ParameterCNN_SettingAuto                = models.BooleanField(default=True)
-    ParameterCNN_Loss                       = models.CharField(max_length=255, default=PARAMETERCNN_LOSS[0][0], choices=PARAMETERCNN_LOSS, help_text="")
-    ParameterCNN_Optimizer                  = models.CharField(max_length=255, default=PARAMETERCNN_OPTIMIZER[0][0], choices=PARAMETERCNN_OPTIMIZER)
+    ParameterCNN_Loss                       = models.CharField(max_length=255, default=PARAMETERCNN_LOSS[0][0], choices=two_cols(PARAMETERCNN_LOSS), help_text="")
+    ParameterCNN_Optimizer                  = models.CharField(max_length=255, default=PARAMETERCNN_OPTIMIZER[0][0], choices=two_cols(PARAMETERCNN_OPTIMIZER) )
     ParameterCNN_Shape                      = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # []
 
     Solving_DateTimeSending                 = models.DateTimeField(auto_now=False, blank=True, null=True)
