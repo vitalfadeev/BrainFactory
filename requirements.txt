@@ -4,7 +4,7 @@ django-allauth==0.39.1
 django-widget-tweaks==1.4.5
 #django-viewflow
 django-material==1.5.8
-django-datatable-view
+django-datatables-view
 mysqlclient
 SQLAlchemy
 jsonfield
