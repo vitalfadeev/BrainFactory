@@ -294,6 +294,8 @@ class PublicAjax(BaseDatatableView):
                 Q(Project_Description__istartswith=sSearch)
             )
 
+        qs = qs.order_by('-Batch_Id')
+
         return qs
 
 
@@ -321,6 +323,8 @@ class MyAjax(BaseDatatableView):
                 Q(Project_Name__istartswith=sSearch) |
                 Q(Project_Description__istartswith=sSearch)
             )
+
+        qs = qs.order_by('-Batch_Id')
 
         return qs
 
