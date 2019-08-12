@@ -42,11 +42,11 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-return;
     $("#my-data").on('click', function(e) {
         if (e.target.tagName == 'TD') {
             var tr = e.target.parentNode;
-            var batch_id = tr.getAttribute('data-id');
+            var td = tr.firstChild;
+            var batch_id = td.innerHTML;
             window.location.href = '/send2/' + batch_id;
         }
     });
