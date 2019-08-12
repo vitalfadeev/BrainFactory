@@ -54,7 +54,12 @@ class SendForm2(forms.ModelForm):
     def add_desc_fields(self, titles, initials):
         for i, t in enumerate(titles):
             fname = 'desc_{}'.format(i)
-            self.fields[fname] = forms.CharField(label='description {}'.format(t), required=False)
+            self.fields[fname] = forms.CharField(label='description {}'.format(t),
+                 required=False,
+                 widget=forms.Textarea(attrs={
+                     'cols': '40',
+                     'rows': '5'
+                 }))
             self.initial[fname] = initials[i] if i < len(initials) else ""
 
 
@@ -127,6 +132,13 @@ class SendForm2(forms.ModelForm):
         return instance
         
 
+from django.utils.safestring import mark_safe
+
+class PlainTextWidget(forms.Widget):
+    def render(self, name, value, attrs=None, renderer=None):
+        return mark_safe(value) if value is not None else ''
+
+
 import json
 from material import Layout, Row, Column, Fieldset, Span2, Span3, Span5, Span6, Span10
 class SendForm3(forms.ModelForm):
@@ -181,14 +193,26 @@ class SendForm3(forms.ModelForm):
         for i in range(10):
             fname_n = 'shape_n{}'.format(i)
             fname_c = 'shape_c{}'.format(i)
-            self.fields[fname_n] = forms.CharField(label='n', required=False) 
+
+            self.fields[fname_n] = forms.CharField(
+                label='' if i in [0,9] else 'Neurons Size',
+                max_length=7,
+                required=False,
+                widget=forms.TextInput(
+                    attrs={
+                        'data-tooltips': json.dumps(models.last_col(models.SHAPE_CHOICES)),
+                    }
+                ) if i > 0 and i < 9 else PlainTextWidget()
+            )
             self.fields[fname_c] = forms.ChoiceField(
                 choices=models.two_cols(models.SHAPE_CHOICES),
-                label='v',
-                widget=forms.Select(choices=models.two_cols(models.SHAPE_CHOICES),
-                                              attrs={
-                                                  'data-tooltips': json.dumps(models.last_col(models.SHAPE_CHOICES))
-                                              }),
+                label="Neurons layer type",
+                widget=forms.Select(
+                    choices=models.two_cols(models.SHAPE_CHOICES),
+                    attrs={
+                        'data-tooltips': json.dumps(models.last_col(models.SHAPE_CHOICES)),
+                    }
+                )
             )
             self.initial[fname_n] = initials[i][0] if i < len(initials) else ""
             self.initial[fname_c] = initials[i][1] if i < len(initials) else ""

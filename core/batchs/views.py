@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
 from django.http import HttpResponse
 from django.template import loader
 from django.conf import settings
+from django.views.generic import TemplateView
+from django_datatables_view.base_datatable_view import BaseDatatableView
 from material import Layout, Row, Fieldset
 from . import models
 
@@ -88,6 +91,7 @@ def send1(request):
 def send2(request, batch_id):
     from django.http import HttpResponseRedirect, Http404
     from . import forms
+    from . import models
     from . import helpers
 
     # check access
@@ -123,7 +127,11 @@ def send2(request, batch_id):
     error_dataset = batch.AnalysisSource_Errors.get("DATASET", "")
     warnings      = [batch.AnalysisSource_Warnings.get(t, "") for t in titles]
     types         = [batch.AnalysisSource_ColumnType.get(t, "") for t in titles]
-    head          = models.BatchInput.get_head(batch.Batch_Id, 5)
+
+    # table name -> model name
+    # columns -> c0, c1, c2, ....
+    #   CharField()
+    #   IntegerField()
 
     template = loader.get_template('send2.html')
 
@@ -139,7 +147,6 @@ def send2(request, batch_id):
         'has_warnings': any(warnings),
         'warnings': warnings,
         'types': types,
-        'head': head,
     }
 
     return HttpResponse(template.render(context, request))
@@ -266,3 +273,66 @@ def view(request, batch_id):
         #'analyser_last_5'       : analyser_last_5,
     }
     return HttpResponse(template.render(context, request))
+
+
+class PublicAjax(BaseDatatableView):
+    model = models.Batchs
+    columns = ['Batch_Id', 'Project_Name', 'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'ProjectSource_ColumnsNameForceInput', 'ProjectSource_ColumnsNameForceOutput', 'Solving_Acuracy']
+    order_columns = ['Batch_Id', 'Project_Name', 'Batch_Action']
+
+    def filter_queryset(self, qs):
+        from django.db.models import Q
+
+        # public only
+        qs = qs.filter(Project_IsPublic=True)
+
+        sSearch = self.request.GET.get('sSearch', None)
+
+        if sSearch:
+            qs = qs.filter(
+                Q(Project_Name__istartswith=sSearch) |
+                Q(Project_Description__istartswith=sSearch)
+            )
+
+        return qs
+
+
+class MyAjax(BaseDatatableView):
+    model = models.Batchs
+    columns = ['Batch_Id', 'Project_Name', 'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'ProjectSource_ColumnsNameForceInput', 'ProjectSource_ColumnsNameForceOutput', 'Solving_Acuracy']
+    order_columns = ['Batch_Id', 'Project_Name', 'Batch_Action']
+
+
+    def get(self, request):
+        self.request = request
+        return super(MyAjax, self).get(request)
+
+
+    def filter_queryset(self, qs):
+        from django.db.models import Q
+
+        # my only
+        qs = qs.filter(User_ID__exact=self.request.user)
+
+        sSearch = self.request.GET.get('sSearch', None)
+
+        if sSearch:
+            qs = qs.filter(
+                Q(Project_Name__istartswith=sSearch) |
+                Q(Project_Description__istartswith=sSearch)
+            )
+
+        return qs
+
+
+class Send2Ajax(BaseDatatableView):
+    model = None
+    columns = ['c0']
+    order_columns = ['c0']
+
+    def get(self, request, batch_id):
+        self.model = models.create_batch_input_model(batch_id)
+        self.columns = [ f.name for f in  self.model._meta.get_fields() ][1:] # without 'index'
+        self.order_columns = self.columns
+        self.request = request
+        return super(Send2Ajax, self).get(request)

@@ -199,3 +199,125 @@ class BatchInput:
             rows = [row for row in result]
 
             return rows
+
+
+def create_model(name, fields=None, app_label='', module='', options=None, admin_opts=None):
+    """
+    Create specified model
+    """
+    class Meta:
+        # Using type('Meta', ...) gives a dictproxy error during model creation
+        pass
+
+    if app_label:
+        # app_label must be set using the Meta inner class
+        setattr(Meta, 'app_label', app_label)
+
+    # Update Meta with any options that were provided
+    if options is not None:
+        for key, value in options.  items():
+            setattr(Meta, key, value)
+
+    # Set up a dictionary to simulate declarations within a class
+    attrs = {'__module__': module, 'Meta': Meta}
+
+    # Add in any fields that were provided
+    if fields:
+        attrs.update(fields)
+
+    # Create the class, which automatically triggers ModelBase processing
+    model = type(name, (models.Model,), attrs)
+
+    # Create an Admin class if admin options were provided
+    if admin_opts is not None:
+        class Admin(admin.ModelAdmin):
+            pass
+        for key, value in admin_opts:
+            setattr(Admin, key, value)
+        admin.site.register(model, Admin)
+
+    return model
+
+
+def create_batch_input_model(batch_id):
+    from_table = "BATCH_INPUT_{}".format(batch_id)
+    name = "BatchInput{}".format(batch_id)
+    fields = {}
+
+    for i, (field_title, field_type, field_params) in enumerate(x(from_table)):
+        if field_title == "index":
+            field_params.update({'primary_key': True})
+            fname = "index"
+        else:
+            fname = "c{}".format(i)
+        fcls = getattr(models, field_type)
+        fields[fname] = fcls(db_column=field_title, **field_params)
+
+    from collections import OrderedDict
+    model = create_model(name, fields, app_label='dynamic', module='core.batchs', options={'db_table':'BATCH_INPUT_{}'.format(batch_id)})
+
+    return model
+
+
+
+def x(table_name):
+    from collections import OrderedDict
+    from django.db import connection, models, migrations
+    from django.db.migrations.migration import Migration
+    from django.db import DEFAULT_DB_ALIAS, connections
+
+    fields = []
+
+    options = {}
+    options['database'] = 'default'
+    connection = connections[options['database']]
+
+    with connection.cursor() as cursor:
+        table_description = connection.introspection.get_table_description(cursor, table_name)
+
+        for row in table_description:
+            field_type, field_params, field_notes = get_field_type(connection, row.type_code, row)
+            fields.append( (row.name, field_type, field_params) )
+
+        return fields
+
+
+def get_field_type(connection, table_name, row):
+    """
+    Given the database connection, the table name, and the cursor row
+    description, this routine will return the given field type name, as
+    well as any additional keyword parameters and notes for the field.
+    """
+    from collections import OrderedDict
+
+    field_params = OrderedDict()
+    field_notes = []
+
+    try:
+        field_type = connection.introspection.get_field_type(row.type_code, row)
+    except KeyError:
+        field_type = 'TextField'
+        field_notes.append('This field type is a guess.')
+
+    # This is a hook for data_types_reverse to return a tuple of
+    # (field_type, field_params_dict).
+    if type(field_type) is tuple:
+        field_type, new_params = field_type
+        field_params.update(new_params)
+
+    # Add max_length for all CharFields.
+    if field_type == 'CharField' and row.internal_size:
+        field_params['max_length'] = int(row.internal_size)
+
+    if field_type == 'DecimalField':
+        if row.precision is None or row.scale is None:
+            field_notes.append(
+                'max_digits and decimal_places have been guessed, as this '
+                'database handles decimal fields as float')
+            field_params['max_digits'] = row.precision if row.precision is not None else 10
+            field_params['decimal_places'] = row.scale if row.scale is not None else 5
+        else:
+            field_params['max_digits'] = row.precision
+            field_params['decimal_places'] = row.scale
+
+    return field_type, field_params, field_notes

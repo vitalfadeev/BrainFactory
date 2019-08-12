@@ -1,5 +1,5 @@
 from django.contrib import admin
 
-from .models import Batchs
+from . import models
 
-admin.site.register(Batchs)
+admin.site.register(models.Batchs)
