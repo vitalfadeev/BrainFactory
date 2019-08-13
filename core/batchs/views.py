@@ -275,9 +275,21 @@ def view(request, batch_id):
     return HttpResponse(template.render(context, request))
 
 
-class PublicAjax(BaseDatatableView):
+class DTView(BaseDatatableView):
+    def initialize(self, *args, **kwargs):
+        super(DTView, self).initialize(*args, **kwargs)
+        if 'iSortingCols' in self._querydict or 'iDisplayLength' in self._querydict:
+            self.pre_camel_case_notation = True
+
+
+    def render_column(self, row, column, *args, **kwargs):
+        res =  super(DTView, self).render_column(row, column, *args, **kwargs)
+        return res
+
+
+class PublicAjax(DTView):
     model = models.Batchs
-    columns = ['Batch_Id', 'Project_Name', 'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'ProjectSource_ColumnsNameForceInput', 'ProjectSource_ColumnsNameForceOutput', 'Solving_Acuracy']
+    columns = ['Batch_Id', 'Project_Name', 'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'AnalysisSource_ColumnsNameInput', 'AnalysisSource_ColumnsNameOutput', 'Solving_Acuracy']
     order_columns = ['Batch_Id', 'Project_Name', 'Batch_Action']
 
     def filter_queryset(self, qs):
@@ -299,9 +311,10 @@ class PublicAjax(BaseDatatableView):
         return qs
 
 
-class MyAjax(BaseDatatableView):
+
+class MyAjax(DTView):
     model = models.Batchs
-    columns = ['Batch_Id', 'Project_Name', 'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'ProjectSource_ColumnsNameForceInput', 'ProjectSource_ColumnsNameForceOutput', 'Solving_Acuracy']
+    columns = ['Batch_Id', 'Project_Name', 'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'AnalysisSource_ColumnsNameInput', 'AnalysisSource_ColumnsNameOutput', 'Solving_Acuracy']
     order_columns = ['Batch_Id', 'Project_Name', 'Batch_Action']
 
 
@@ -329,7 +342,7 @@ class MyAjax(BaseDatatableView):
         return qs
 
 
-class Send2Ajax(BaseDatatableView):
+class Send2Ajax(DTView):
     model = None
     columns = ['c0']
     order_columns = ['c0']
