@@ -129,6 +129,43 @@ class Batchs(models.Model):
     Solving_TextError                       = models.TextField(blank=True, null=True)
     Solving_TextWarning                     = models.TextField(blank=True, null=True)
 
+    @property
+    def input_columns(self):
+        # force in + (analyser in - force out)
+        columns = []
+
+        for c in self.ProjectSource_ColumnsNameForceInput:
+            columns.append(c)
+
+        for c in self.AnalysisSource_ColumnsNameInput:
+            if c not in self.ProjectSource_ColumnsNameForceOutput:
+                columns.append(c)
+
+        return columns
+
+
+    @property
+    def output_columns(self):
+        # force out + (analyser out - force in)
+        columns = []
+
+        for c in self.ProjectSource_ColumnsNameForceOutput:
+            columns.append(c)
+
+        for c in self.AnalysisSource_ColumnsNameOutput:
+            if c not in self.ProjectSource_ColumnsNameForceInput:
+                columns.append(c)
+
+        return columns
+
+
+    @property
+    def status(self):
+        if self.input_columns and self.output_columns:
+            return 'Done'
+        else:
+            return 'Wait'
+
 
 class BatchInput:
     @classmethod
