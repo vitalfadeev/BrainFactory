@@ -1,3 +1,6 @@
+import datetime
+from datetime import datetime
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
@@ -276,6 +279,8 @@ def view(request, batch_id):
 
 
 class DTView(BaseDatatableView):
+    datetime_format = "%Y-%m-%d %H:%M"
+
     def initialize(self, *args, **kwargs):
         super(DTView, self).initialize(*args, **kwargs)
         if 'iSortingCols' in self._querydict or 'iDisplayLength' in self._querydict:
@@ -284,7 +289,12 @@ class DTView(BaseDatatableView):
 
     def render_column(self, row, column, *args, **kwargs):
         res =  super(DTView, self).render_column(row, column, *args, **kwargs)
-        return res
+        value = getattr(row, column)
+
+        if isinstance(value, datetime):
+            return value.strftime(self.datetime_format)
+        else:
+            return res
 
 
 class PublicAjax(DTView):
