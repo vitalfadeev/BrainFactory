@@ -299,8 +299,8 @@ class DTView(BaseDatatableView):
 
 class PublicAjax(DTView):
     model = models.Batchs
-    columns = ['Batch_Id', 'Project_Name', 'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'AnalysisSource_ColumnsNameInput', 'AnalysisSource_ColumnsNameOutput', 'Solving_Acuracy']
-    order_columns = ['Batch_Id', 'Project_Name', 'Batch_Action']
+    columns = ['Batch_Id', 'Project_Name','Batch_Version',  'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'AnalysisSource_ColumnsNameInput', 'AnalysisSource_ColumnsNameOutput', 'Solving_Acuracy']
+    order_columns = ['Batch_Id', 'Project_Name', 'Batch_Version', 'Batch_Action']
 
     def filter_queryset(self, qs):
         from django.db.models import Q
@@ -321,11 +321,23 @@ class PublicAjax(DTView):
         return qs
 
 
+    def render_column(self, row, column, *args, **kwargs):
+        res =  super(DTView, self).render_column(row, column, *args, **kwargs)
+
+        if column == "Batch_Action":
+            value = getattr(row, column)
+            if row.AnalysisSource_ColumnsNameInput and row.AnalysisSource_ColumnsNameOutput:
+                return 'Done'
+            else:
+                return 'Wait'
+        else:
+            return res
+
 
 class MyAjax(DTView):
     model = models.Batchs
-    columns = ['Batch_Id', 'Project_Name', 'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'AnalysisSource_ColumnsNameInput', 'AnalysisSource_ColumnsNameOutput', 'Solving_Acuracy']
-    order_columns = ['Batch_Id', 'Project_Name', 'Batch_Action']
+    columns = ['Batch_Id', 'Project_Name','Batch_Version',  'Batch_Received_DateTime', 'Project_Description', 'Batch_Action', 'AnalysisSource_ColumnsNameInput', 'AnalysisSource_ColumnsNameOutput', 'Solving_Acuracy']
+    order_columns = ['Batch_Id', 'Project_Name', 'Batch_Version', 'Batch_Action']
 
 
     def get(self, request):
@@ -339,6 +351,9 @@ class MyAjax(DTView):
         # my only
         qs = qs.filter(User_ID__exact=self.request.user)
 
+        # not public
+        qs = qs.filter(Project_IsPublic=False)
+
         sSearch = self.request.GET.get('sSearch', None)
 
         if sSearch:
@@ -350,6 +365,19 @@ class MyAjax(DTView):
         qs = qs.order_by('-Batch_Id')
 
         return qs
+
+
+    def render_column(self, row, column, *args, **kwargs):
+        res =  super(DTView, self).render_column(row, column, *args, **kwargs)
+
+        if column == "Batch_Action":
+            value = getattr(row, column)
+            if row.AnalysisSource_ColumnsNameInput and row.AnalysisSource_ColumnsNameOutput:
+                return 'Done'
+            else:
+                return 'Wait'
+        else:
+            return res
 
 
 class Send2Ajax(DTView):
