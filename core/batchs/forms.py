@@ -34,7 +34,8 @@ class SendForm2(forms.ModelForm):
 
         fields = (
         )
-        fields_required = []
+        fields_required = [
+        ]
         labels = {
         }
         widgets = {
@@ -47,7 +48,7 @@ class SendForm2(forms.ModelForm):
         batch = kwargs['instance']
         titles = models.BatchInput.get_titles(batch.Batch_Id)
         self.add_desc_fields(titles, batch.Project_ColumnsDescription)
-        self.add_inout_fields(titles, batch.AnalysisSource_ColumnsNameInput, batch.AnalysisSource_ColumnsNameOutput)
+        self.add_inout_fields(titles, batch)
 
     
     # desc
@@ -82,14 +83,19 @@ class SendForm2(forms.ModelForm):
             
 
     # in / out
-    def add_inout_fields(self, titles, initials_in, initials_out):
+    def add_inout_fields(self, titles, batch):
         for i, t in enumerate(titles):
             fname = 'inout_{}'.format(i)
             self.fields[fname] = forms.CharField(label='inout {}'.format(t), required=False, 
                                                  widget=forms.Select(choices=INOUT_CHOICES))
-            if t in initials_in:
+
+            if t in batch.ProjectSource_ColumnsNameForceInput:
                 self.initial[fname] = "INPUT"
-            elif t in initials_out:
+            elif t in batch.ProjectSource_ColumnsNameForceOutput:
+                self.initial[fname] = "OUTPUT"
+            elif t in batch.AnalysisSource_ColumnsNameInput:
+                self.initial[fname] = "INPUT"
+            elif t in batch.AnalysisSource_ColumnsNameOutput:
                 self.initial[fname] = "OUTPUT"
 
 
@@ -106,16 +112,18 @@ class SendForm2(forms.ModelForm):
 
 
     def save_inout_fields(self, batch):
-        batch.AnalysisSource_ColumnsNameInput = []
-        batch.AnalysisSource_ColumnsNameOutput = []
-        
+        batch.ProjectSource_ColumnsNameForceInput = []
+        batch.ProjectSource_ColumnsNameForceOutput = []
+
         titles = models.BatchInput.get_titles(batch.Batch_Id)
         
         for c, (f, v) in zip(titles, self.get_inout_values()):
             if v == "INPUT":
-                batch.AnalysisSource_ColumnsNameInput.append(c)
+                if c not in batch.AnalysisSource_ColumnsNameInput:
+                    batch.ProjectSource_ColumnsNameForceInput.append(c)
             elif v == "OUTPUT":
-                batch.AnalysisSource_ColumnsNameOutput.append(c)
+                if c not in batch.AnalysisSource_ColumnsNameOutput:
+                    batch.ProjectSource_ColumnsNameForceOutput.append(c)
             else:
                 pass
             
