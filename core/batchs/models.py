@@ -159,9 +159,16 @@ class Batchs(models.Model):
         return columns
 
 
+    def has_nn_data(self):
+        if self.input_columns and self.output_columns:
+            return True
+        else:
+            return False
+
+
     @property
     def status(self):
-        if self.input_columns and self.output_columns:
+        if self.has_nn_data():
             return 'Done'
         else:
             return 'Wait'
