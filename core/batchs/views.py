@@ -1,6 +1,3 @@
-import datetime
-from datetime import datetime
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
@@ -8,16 +5,9 @@ from django.http import HttpResponse
 from django.template import loader
 from django.conf import settings
 from django.views.generic import TemplateView
-from django_datatables_view.base_datatable_view import BaseDatatableView
-from material import Layout, Row, Fieldset
 from . import models
+from . import dt
 
-
-# signup: allauth.account.forms.SignupForm
-# signup: allauth.socialaccount.forms.SignupForm
-# add_email: allauth.account.forms.AddEmailForm
-# change_password: allauth.account.forms.ChangePasswordForm
-# reset_password: allauth.account.forms.ResetPasswordForm
 
 # Create your views here.
 def home(request):
@@ -26,8 +16,6 @@ def home(request):
 
 @login_required
 def my(request):
-    from . import models
-
     query_results = models.Batchs.objects.filter(User_ID=request.user).order_by('-Batch_Received_DateTime')
 
     template = loader.get_template('my.html')
@@ -95,7 +83,6 @@ def send2(request, batch_id):
     from django.http import HttpResponseRedirect, Http404
     from . import forms
     from . import models
-    from . import helpers
 
     # check access
     batch = models.Batchs.objects.get(Batch_Id=batch_id)
@@ -105,7 +92,7 @@ def send2(request, batch_id):
     else:
         raise Http404
 
-    # if this is a POST request we need to process the form data
+    # POST
     if request.method == 'POST':
         form = forms.SendForm2(request.POST, request.FILES, instance=batch)
 
@@ -114,22 +101,29 @@ def send2(request, batch_id):
 
             if 'btn_next' in request.POST:
                 return HttpResponseRedirect('/send3/{}'.format(batch.Batch_Id))
-        else:
-            print(form.errors)
 
     # GET
     else:
         form = forms.SendForm2(instance=batch)
 
     # render
-    titles = models.BatchInput.get_titles(batch.Batch_Id)
+    titles = models.BatchInput(batch.Batch_Id).get_column_names(without_pk=True)
 
-    desc_fields   = form.get_desc_fields
-    inout_fields  = form.get_inout_fields
+    desc_fields   = list(form.get_desc_fields())
+    inout_fields  = list(form.get_inout_fields())
     errors        = [batch.AnalysisSource_Errors.get(t, "") for t in titles]
     error_dataset = batch.AnalysisSource_Errors.get("DATASET", "")
     warnings      = [batch.AnalysisSource_Warnings.get(t, "") for t in titles]
     types         = [batch.AnalysisSource_ColumnType.get(t, "") for t in titles]
+
+    l = len(titles)
+
+    desc_fields   = desc_fields[0:l]
+    inout_fields  = inout_fields[0:l]
+    errors        = errors[0:l]
+    error_dataset = error_dataset
+    warnings      = warnings[0:l]
+    types         = types[0:l]
 
     # table name -> model name
     # columns -> c0, c1, c2, ....
@@ -169,7 +163,7 @@ def send3(request, batch_id):
     else:
         raise Http404
 
-    # if this is a POST request we need to process the form data
+    # POST
     if request.method == 'POST':
         form = forms.SendForm3(request.POST, request.FILES, instance=batch)
 
@@ -177,11 +171,7 @@ def send3(request, batch_id):
             form.save()
             return HttpResponseRedirect('/send3/{}'.format(batch.Batch_Id))
 
-        else:
-            print(form.errors)
-            return HttpResponseRedirect('/send3/{}'.format(batch.Batch_Id))
-
-    # if a GET (or any other method) we'll create a blank form
+    # GET
     else:
         form    = forms.SendForm3(instance=batch)
 
@@ -218,46 +208,9 @@ def view(request, batch_id):
             raise Http404
 
     # query lines
-    data_titles = models.BatchInput.get_titles(batch_id)
+    data_titles = models.BatchInput(batch_id).get_column_names(without_pk=True)
     data_head = models.BatchInput.get_head(batch_id, FIRST_LINES)
     data_tail = models.BatchInput.get_tail(batch_id, LAST_LINES)
-    """
-    #
-    if batch.AnalysisSource_ColumnsNameInput:
-        analyser_cols_input = json.loads(batch.AnalysisSource_ColumnsNameInput)
-    else:
-        analyser_cols_input = []
-
-    #
-    if batch.AnalysisSource_ColumnsNameOutput:
-        analyser_cols_output = json.loads(batch.AnalysisSource_ColumnsNameOutput)
-    else:
-        analyser_cols_output = []
-
-    #
-    if batch.AnalysisSource_ColumnType:
-        analyser_cols_type_in = []
-        types = json.loads(batch.AnalysisSource_ColumnType)
-        for cname in analyser_cols_input:
-            tp = types.get(cname, None)
-            analyser_cols_type_in.append( tp )
-    else:
-        analyser_cols_type_in = []
-
-    #
-    if batch.AnalysisSource_ColumnType:
-        analyser_cols_type_out = []
-        types = json.loads(batch.AnalysisSource_ColumnType)
-        for cname in analyser_cols_output:
-            tp = types[cname]
-            analyser_cols_type_out.append( tp )
-    else:
-        analyser_cols_type_out = []
-
-    #
-    analyser_first_5 = []
-    analyser_last_5 = []
-    """
 
     template = loader.get_template('view.html')
 
@@ -266,38 +219,11 @@ def view(request, batch_id):
         'data_titles': data_titles,
         'data_head': data_head,
         'data_tail' : data_tail,
-        #'analyser_errors'       : helpers.from_json(batch.AnalysisSource_Errors, {}),
-        #'analyser_warnings'     : helpers.from_json(batch.AnalysisSource_Warnings, {}),
-        #'analyser_cols_input'   : analyser_cols_input,
-        #'analyser_cols_output'  : analyser_cols_output,
-        #'analyser_cols_type_in' : analyser_cols_type_in,
-        #'analyser_cols_type_out': analyser_cols_type_out,
-        #'analyser_first_5'      : analyser_first_5,
-        #'analyser_last_5'       : analyser_last_5,
     }
     return HttpResponse(template.render(context, request))
 
 
-class DTView(BaseDatatableView):
-    datetime_format = "%Y-%m-%d %H:%M"
-
-    def initialize(self, *args, **kwargs):
-        super(DTView, self).initialize(*args, **kwargs)
-        if 'iSortingCols' in self._querydict or 'iDisplayLength' in self._querydict:
-            self.pre_camel_case_notation = True
-
-
-    def render_column(self, row, column, *args, **kwargs):
-        res =  super(DTView, self).render_column(row, column, *args, **kwargs)
-        value = getattr(row, column)
-
-        if isinstance(value, datetime):
-            return value.strftime(self.datetime_format)
-        else:
-            return res
-
-
-class PublicAjax(DTView):
+class PublicAjax(dt.DTView):
     model = models.Batchs
     columns = ['Batch_Id', 'Project_Name','Batch_Version',  'Batch_Received_DateTime', 'Project_Description', 'status', 'input_columns', 'output_columns', 'Solving_Acuracy']
     order_columns = ['Batch_Id', 'Project_Name', 'Batch_Version', 'status']
@@ -308,6 +234,7 @@ class PublicAjax(DTView):
         # public only
         qs = qs.filter(Project_IsPublic=True)
 
+        # search
         sSearch = self.request.GET.get('sSearch', None)
 
         if sSearch:
@@ -316,12 +243,13 @@ class PublicAjax(DTView):
                 Q(Project_Description__istartswith=sSearch)
             )
 
+        # last at top
         qs = qs.order_by('-Batch_Id')
 
         return qs
 
 
-class MyAjax(DTView):
+class MyAjax(dt.DTView):
     model = models.Batchs
     columns = ['Batch_Id', 'Project_Name','Batch_Version',  'Batch_Received_DateTime', 'Project_Description', 'status', 'input_columns', 'output_columns', 'Solving_Acuracy']
     order_columns = ['Batch_Id', 'Project_Name', 'Batch_Version', 'status']
@@ -341,6 +269,7 @@ class MyAjax(DTView):
         # not public
         qs = qs.filter(Project_IsPublic=False)
 
+        # search
         sSearch = self.request.GET.get('sSearch', None)
 
         if sSearch:
@@ -349,19 +278,19 @@ class MyAjax(DTView):
                 Q(Project_Description__istartswith=sSearch)
             )
 
+        # last at top
         qs = qs.order_by('-Batch_Id')
 
         return qs
 
 
-class Send2Ajax(DTView):
-    model = None
-    columns = ['c0']
-    order_columns = ['c0']
-
+class Send2Ajax(dt.DTView):
     def get(self, request, batch_id):
-        self.model = models.create_batch_input_model(batch_id)
-        self.columns = [ f.name for f in  self.model._meta.get_fields() ][1:] # without 'index'
+        # Query from table BATCH_INPUT_NNN
+        # without pk 'index'
+        # return JSON
+        self.model = models.BatchInput(batch_id)
+        self.columns = [ f.name for f in  self.model._meta.get_fields() ][1:] # without 'index' PK
         self.order_columns = self.columns
-        self.request = request
         return super(Send2Ajax, self).get(request)
+

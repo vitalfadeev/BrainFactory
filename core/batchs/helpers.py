@@ -94,8 +94,11 @@ def pre_analyse(local_file_name, batch):
     file_csv = local_file_name + ".csv"
     convert_uploaded_to_csv(local_file_name, file_csv)
 
+    table_name = "BATCH_INPUT_{}".format(batch.Batch_Id)
+
     # Analyse with external analyser
-    A = data_pre_analyser.analyse_source_data_find_input_output(file_csv)
+    A = data_pre_analyser.analyse_source_data_find_input_output(
+        file_csv, sql_mode=True, table_name=table_name, con=get_db_connection())
     batch.AnalysisSource_ColumnsNameInput           = A.column_names_input
     batch.AnalysisSource_ColumnsNameOutput          = A.column_names_output
     batch.AnalysisSource_ColumnType                 = A.column_types

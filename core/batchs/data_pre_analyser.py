@@ -118,18 +118,21 @@ def check_type_for_column_with_mixed_data(analyzer_object, column_from_dataset):
         return 'NUMERIC'
 
 
-def analyse_source_data_find_input_output(filename_with_data):
+def analyse_source_data_find_input_output(filename_with_data, sql_mode=True, table_name=None, con=None, index_col='index'):
 
     analyzed_object_from_file = AnalyzedObject()
     dataframe_from_file = None
     columns_type = {}
 
-    # Check format of input file and read file with pandas
-    if filename_with_data.endswith('.csv'):
-        dataframe_from_file = pd.read_csv(filename_with_data, sep='\t', engine='python')
+    if sql_mode:
+        dataframe_from_file = pd.read_sql(table_name, con, index_col)
+    else:
+        # Check format of input file and read file with pandas
+        if filename_with_data.endswith('.csv'):
+            dataframe_from_file = pd.read_csv(filename_with_data, sep='\t', engine='python')
 
-    elif filename_with_data.endswith('.xls') or filename_with_data.endswith('.xlsx'):
-        dataframe_from_file = pd.read_excel(filename_with_data)
+        elif filename_with_data.endswith('.xls') or filename_with_data.endswith('.xlsx'):
+            dataframe_from_file = pd.read_excel(filename_with_data)
 
     number_of_rows_in_dataset = len(dataframe_from_file)
 

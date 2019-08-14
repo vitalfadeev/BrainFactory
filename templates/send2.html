@@ -14,21 +14,21 @@
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
 {% endblock extrajs %}
 
-
 {% block content %}
 <style>
+.container {
+    margin: 20px;
+    width: 100%;
+}
+
 #row-desc textarea:focus {
     min-width: 305px;
     height: 158px;
 }
 
 #send2-form {
+    table-layout: fixed;
     white-space: nowrap;
-}
-
-.container {
-    margin: 20px;
-    width: 100%;
 }
 </style>
 
@@ -132,7 +132,7 @@
 <script type="text/javascript" language="javascript" class="init">
 // table
 $(document).ready(function() {
-    var USERS_LIST_JSON_URL = '{% url "send2_ajax" batch.Batch_Id %}';
+    var USERS_LIST_JSON_URL = '{% url "send2/id/ajax"  batch.Batch_Id %}';
     // translations for datatables
     var oLanguages = {
         oPaginate:{

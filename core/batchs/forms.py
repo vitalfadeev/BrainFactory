@@ -1,7 +1,9 @@
+import json
 from django import forms
-from . import models
-from . import helpers
+from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
+from material import Layout, Row, Column, Fieldset, Span2, Span3, Span5, Span6, Span10
+from . import models
 
 
 class SendForm1(forms.ModelForm):
@@ -46,7 +48,7 @@ class SendForm2(forms.ModelForm):
         super(SendForm2, self).__init__(*args, **kwargs)
 
         batch = kwargs['instance']
-        titles = models.BatchInput.get_titles(batch.Batch_Id)
+        titles = models.BatchInput(batch.Batch_Id).get_column_names(without_pk=True)
         self.add_desc_fields(titles, batch.Project_ColumnsDescription)
         self.add_inout_fields(titles, batch)
 
@@ -115,7 +117,7 @@ class SendForm2(forms.ModelForm):
         batch.ProjectSource_ColumnsNameForceInput = []
         batch.ProjectSource_ColumnsNameForceOutput = []
 
-        titles = models.BatchInput.get_titles(batch.Batch_Id)
+        titles = models.BatchInput(batch.Batch_Id).get_column_names(without_pk=True) # without 'index' PK
         
         for c, (f, v) in zip(titles, self.get_inout_values()):
             if v == "INPUT":
@@ -140,15 +142,11 @@ class SendForm2(forms.ModelForm):
         return instance
         
 
-from django.utils.safestring import mark_safe
-
 class PlainTextWidget(forms.Widget):
     def render(self, name, value, attrs=None, renderer=None):
         return mark_safe(value) if value is not None else ''
 
 
-import json
-from material import Layout, Row, Column, Fieldset, Span2, Span3, Span5, Span6, Span10
 class SendForm3(forms.ModelForm):
     class Meta:
         model = models.Batchs
@@ -241,27 +239,3 @@ class SendForm3(forms.ModelForm):
             instance.ParameterCNN_Shape.append((vn, vc)) 
         instance.save()
         return instance
-
-
-# JSON field
-#   render table columns                   <- field_titles
-#   render row with input text fields       <-field_titles + field_inputs
-#   render row with text data               <-field_titles + field_text_errors
-#   render row with text data               <-field_titles + field_text_warnings
-#   render row with input selects fields    <-field_titles + field_input + field_output
-#   render row with text data               <-field_titles + field_type
-#
-# Form
-#   field_titles                        <- titles (table titles)
-#   field_desc                          <- titles + desc
-#   field_errors                        <- titles + errors
-#   field_warnings                      <- titles + warnings
-#   field_select_input_output_empty     <- titles + inputs + outputs
-#   field_types                         <- titles + types
-#
-# produces:
-#   <input type="text" name="field_desc_0">
-#   <input type="text" name="field_desc_1">
-#   <input type="text" name="field_desc_2">
-#   ...
-
