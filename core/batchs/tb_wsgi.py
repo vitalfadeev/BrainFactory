@@ -9,8 +9,8 @@ def tb_wsgi_app(environ, start_response, batch_id):
 
     #program.main(default.get_plugins(), default.get_assets_zip_provider())
     plugins = default.get_plugins()
-    assets_zip_provider = default.get_assets_zip_provider()
-    #assets_zip_provider = None
+    #assets_zip_provider = default.get_assets_zip_provider()
+    assets_zip_provider = None
     program.FLAGS.logdir = "tf-logs/{}".format(batch_id)
     program.FLAGS.path_prefix = "/view/{}".format(batch_id)
 
