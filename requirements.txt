@@ -11,5 +11,5 @@ jsonfield
 xlrd
 pandas
 numpy
-tensorflow
+tensorflow==1.8.0
 
