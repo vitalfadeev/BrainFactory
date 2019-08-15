@@ -23,9 +23,6 @@ urlpatterns = [
     # google, facebook auth
     path('accounts/', include('allauth.urls')),
 
-    # materian design
-    # path('', include(frontend_urls)),
-
     # batch
     path('', include('core.batchs.urls')),
 

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} TensorBoard {% endblock %}
+
+{% block extrajs %}
+<script>
+$(document).ready(function(){
+    $.get( "{% static "tensorboard/engine.html" %}", function( data ) {
+        $("#tb-engine").html( data );
+    });
+});
+</script>
+{% endblock %}
+
+{% block before_content %}
+<div id="tb-engine"></div>
+<tf-tensorboard use-hash brand="TensorBoard"></tf-tensorboard>
+{% endblock %}

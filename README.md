@@ -1,4 +1,13 @@
-## Send
+## install 
+    ./1-install.sh
+    ./2-update-settings.sh
+    ./3-post-install.sh
+    
+## Deploy
+    ./deploy.sh
+
+
+## Send logic
 - phase 1 (uploading)
     - upload file xls / csv
     - read
@@ -16,5 +25,22 @@
         - show errors
 
  
-- phase 3 (train parameters)
+- phase 3 (NN parameters)
+
+
+## Setup TF
+
+- TensorFlow
+  - in
+    - data 
+    - config
+  - out
+    - logs
+    - model
+
+- TensorBoard
+  - in
+    - TF logs
+  - out
+    - web page
 

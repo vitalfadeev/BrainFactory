@@ -294,3 +294,21 @@ class Send2Ajax(dt.DTView):
         self.order_columns = self.columns
         return super(Send2Ajax, self).get(request)
 
+
+# tb
+from django import conf
+
+def include_raw(path):
+    import os.path
+
+    for template_dir in conf.settings.TEMPLATES[0]['DIRS']:
+        filepath = '%s/%s' % (template_dir, path)
+        if os.path.isfile(filepath):
+            break
+
+    with open(filepath, 'rb') as fp:
+        return fp.read()
+
+def tb(request, batch_id):
+    return render(request, 'view_tb.html')
+

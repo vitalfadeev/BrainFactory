@@ -95,7 +95,9 @@
         </nav>
     </header>
 
-    <div class="container">
+    {% block before_content %}{% endblock before_content %}
+
+    <div class="container" id="content">
         <!-- Content-->
         {% block content %}{% endblock content %}
     </div>
