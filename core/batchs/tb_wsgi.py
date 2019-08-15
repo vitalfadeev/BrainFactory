@@ -2,6 +2,7 @@ def tb_wsgi_app(environ, start_response, batch_id):
     from tensorboard import default
     from tensorboard import program
     from tensorboard.backend import application
+    from django import conf
 
     # fix. ungzip
     # request.headers unset 'Accept-Encoding'
@@ -17,8 +18,9 @@ def tb_wsgi_app(environ, start_response, batch_id):
     #tb_wsgi = program.create_tb_app(plugins, assets_zip_provider)
     tensorboard = program.TensorBoard(plugins, assets_zip_provider)
 
+
     argv = [__file__,
-        '--logdir=tf-logs/{}'.format(batch_id),
+        '--logdir={}/tf-logs/{}'.format(conf.settings.BASE_DIR, batch_id),
         '--path_prefix=/view/{}'.format(batch_id)
     ]
     tensorboard.configure(argv=argv)
