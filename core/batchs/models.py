@@ -126,6 +126,8 @@ class Batchs(models.Model):
     ParameterCNN_Loss                       = models.CharField(max_length=255, default=PARAMETERCNN_LOSS[0][0], choices=two_cols(PARAMETERCNN_LOSS), help_text="")
     ParameterCNN_Optimizer                  = models.CharField(max_length=255, default=PARAMETERCNN_OPTIMIZER[0][0], choices=two_cols(PARAMETERCNN_OPTIMIZER) )
     ParameterCNN_Shape                      = jsonfield.JSONField(load_kwargs={'object_pairs_hook': collections.OrderedDict}, default=[]) # []
+    ParameterCNN_Batch_size                 = models.IntegerField(default=0)
+    ParameterCNN_Epoch                      = models.IntegerField(default=0)
 
     Solving_DateTimeSending                 = models.DateTimeField(auto_now=False, blank=True, null=True)
     Solving_DelayElapsed                    = models.IntegerField(default=0)
@@ -179,6 +181,26 @@ class Batchs(models.Model):
         else:
             return BATCH_STATE_WAIT
 
+    @property
+    def types(self):
+        titles = self.titles
+        return [self.AnalysisSource_ColumnType.get(t, "") for t in titles]
+
+    @property
+    def warnings(self):
+        titles = self.titles
+        return [self.AnalysisSource_Warnings.get(t, "") for t in titles]
+
+    @property
+    def errors(self):
+        titles = self.titles
+        return [self.AnalysisSource_Errors.get(t, "") for t in titles]
+
+    @property
+    def titles(self):
+        titles = BatchInput(self.Batch_Id).get_column_names(without_pk=True)
+        return titles
+
 
 def BatchInput(batch_id):
     """
@@ -188,6 +210,25 @@ def BatchInput(batch_id):
     """
     cls     = "BatchInput{}".format(batch_id)
     table   = "BATCH_INPUT_{}".format(batch_id)
+    app     = 'core'
+    module  = 'batchs'
+    pk      = 'index'
+
+    cls = dymo.get_dynamic_model(
+        (models.Model, dymo.DymoMixin),cls, table, app, module, pk
+    )
+
+    return cls
+
+
+def BatchSolved(batch_id):
+    """
+    Dynamic model factory
+    example:
+        model = models.BatchInput(batch_id)
+    """
+    cls     = "BatchSolved{}".format(batch_id)
+    table   = "BATCH_SOLVED_{}".format(batch_id)
     app     = 'core'
     module  = 'batchs'
     pk      = 'index'

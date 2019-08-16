@@ -1,36 +1,18 @@
-{% extends 'base.html' %}
 {% load static %}
-{% load socialaccount %}
-{% load widget_tweaks %}
-{% load material_form %}
-{% block title %} Sign in {% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+{% endblock extracss %}
+
+{% block extrajs %}
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+{% endblock extrajs %}
 
 
 {% block content %}
-<style>
-.container {
-    margin: 20px;
-    width: 100%;
-}
-
-#row-desc textarea:focus {
-    min-width: 305px;
-    height: 158px;
-}
-
-#send2-form {
-    table-layout: fixed;
-    white-space: nowrap;
-}
-</style>
 
 <div class="">
     <div class="">
-        <h4>Display table</h4>
-
-        <form method="POST" enctype="multipart/form-data" id="send2-form">
-            {% csrf_token %}
-
             {% if error_dataset %}
             <div id="dataset-error" class="card-panel red lighten-5">
                 <dic>
@@ -39,17 +21,11 @@
             </div>
             {% endif %}
 
-            <table class="" id="send2-table">
+            <table class="" id="data-input-table" style="width:100%;">
                 <thead>
                 <tr id="row-titles">
                     {% for t in titles %}
                     <th>{{ t }}</th>
-                    {% endfor %}
-                </tr>
-
-                <tr id="row-desc">
-                    {% for f in desc_fields %}
-                    <td>{{ f }}</td>
                     {% endfor %}
                 </tr>
 
@@ -77,12 +53,6 @@
                 </tr>
                 {% endif %}
 
-                <tr id="row-in-out">
-                    {% for f in inout_fields %}
-                    <td>{{ f }}</td>
-                    {% endfor %}
-                </tr>
-
                 <tr id="row-types">
                     {% for f in types %}
                     <td>{{ f }}</td>
@@ -95,39 +65,13 @@
                 </tbody>
             </table>
 
-            <br>
-            <!-- Default submit on Enter pressed --->
-            <div class="hide">
-                <button  type="submit" value="btn_apply"/>
+            <div class="">
+                <a href="{% url "view_export_input_csv" batch.Batch_Id %}" class="">Download File data in CSV</a>
+                or
+                <a href="{% url "view_export_input_xls" batch.Batch_Id %}" class="">XLS</a>
             </div>
-
-            <div class="right-align">
-                <button type="submit" name="btn_next" class="btn">Next page</button>
-            </div>
-
-            <br>
-            <div class="right-align">
-                <button type="submit" name="btn_apply" class="btn">Apply changes</button>
-            </div>
-        </form>
-
     </div>
 </div>
-
-<!-- JS -->
-<script>
-  $(document).ready(function(){
-    $('select').formSelect();
-  });
-</script>
-
-{% block extracss %}
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
-{% endblock extracss %}
-
-{% block extrajs %}
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
-{% endblock extrajs %}
 
 <script type="text/javascript" language="javascript" class="init">
 // table
@@ -150,7 +94,7 @@ $(document).ready(function() {
         sZeroRecords:   "No data to show"
     };
 
-    var dt_table = $('#send2-table').dataTable({
+    var dt_table = $('#data-input-table').dataTable({
         "pageLength": 5,
         "lengthChange": false,
         "searching": false,

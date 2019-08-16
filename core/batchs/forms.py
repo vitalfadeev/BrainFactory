@@ -153,11 +153,15 @@ class SendForm3(forms.ModelForm):
         fields = (
             'ParameterCNN_Loss',
             'ParameterCNN_Optimizer',
+            'ParameterCNN_Batch_size',
+            'ParameterCNN_Epoch',
         )
         fields_required = []
         labels = {
             "ParameterCNN_Loss": "Loss",
             "ParameterCNN_Optimizer": "Optimizer",
+            "ParameterCNN_Batch_size": "Batch size",
+            "ParameterCNN_Epoch": "Epoch",
         }
         widgets = {
              'ParameterCNN_Optimizer': forms.Select(choices=models.two_cols(models.PARAMETERCNN_OPTIMIZER), 
@@ -173,7 +177,9 @@ class SendForm3(forms.ModelForm):
     layout = Layout(
         Fieldset("NN Parameters",
             Row('ParameterCNN_Optimizer'),
-            Row('ParameterCNN_Loss')
+            Row('ParameterCNN_Loss'),
+            Row('ParameterCNN_Batch_size'),
+            Row('ParameterCNN_Epoch')
          ),
         Fieldset('Shape',
             Row('shape_n0', 'shape_c0'),

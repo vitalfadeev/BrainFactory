@@ -5,6 +5,8 @@ from django.http import HttpResponse
 from django.template import loader
 from django.conf import settings
 from django.views.generic import TemplateView
+from django import conf
+from django.shortcuts import redirect
 from . import models
 from . import dt
 
@@ -186,15 +188,9 @@ def send3(request, batch_id):
 
 #@login_required
 def view(request, batch_id):
-    import os
-    import json
-    from django.http import Http404
-    from django.conf import settings
+    from django.http import HttpResponseRedirect, Http404
     from . import models
-    from . import helpers
 
-    FIRST_LINES = 5
-    LAST_LINES = 5
 
     # check access
     batch = models.Batchs.objects.get(Batch_Id=batch_id)
@@ -207,22 +203,71 @@ def view(request, batch_id):
         else:
             raise Http404
 
-    # query lines
-    data_titles = models.BatchInput(batch_id).get_column_names(without_pk=True)
-    data_head = models.BatchInput.get_head(batch_id, FIRST_LINES)
-    data_tail = models.BatchInput.get_tail(batch_id, LAST_LINES)
+    # render
+    # input
+    titles = batch.titles
+
+    errors        = batch.errors
+    error_dataset = batch.AnalysisSource_Errors.get("DATASET", "")
+    warnings      = batch.warnings
+    types         = batch.types
+
+    # solved
+    model_solved = models.BatchSolved(batch.Batch_Id)
+
+    is_data_solved = model_solved.has_table()
+
+    if is_data_solved:
+        titles_solved = model_solved.get_column_names(without_pk=True)
+        types_solved  = model_solved.get_column_types(without_pk=True)
+    else:
+        titles_solved = []
+        types_solved  = []
 
     template = loader.get_template('view.html')
 
     context = {
         'batch': batch,
-        'data_titles': data_titles,
-        'data_head': data_head,
-        'data_tail' : data_tail,
+        'titles': titles,
+        'has_errors': any(errors),
+        'errors': errors,
+        'error_dataset': error_dataset,
+        'has_warnings': any(warnings),
+        'warnings': warnings,
+        'types': types,
+        'is_data_solved': is_data_solved,
+        'titles_solved': titles_solved,
+        'types_solved': types_solved,
     }
+
     return HttpResponse(template.render(context, request))
 
 
+@login_required
+def view_tb(request, batch_id):
+    return render(request, 'view_tb.html')
+
+
+@login_required
+def view_tb_self(request, batch_id):
+    return render(request, 'view_tb_self.html')
+
+
+def serve_file(filename):
+    response = HttpResponse(mimetype="text/html")
+    for line in open(filename):
+        response.write(line)
+    return response
+
+def serve_file2(filename):
+    image_data = open(filename, "rb").read()
+    return HttpResponse(image_data, content_type="text/html")
+
+def view_tb_static(request, batch_id=None):
+    return serve_file2(settings.BASE_DIR + '/static/tensorboard/index.html')
+
+
+# public
 class PublicAjax(dt.DTView):
     model = models.Batchs
     columns = ['Batch_Id', 'Project_Name','Batch_Version',  'Batch_Received_DateTime', 'Project_Description', 'status', 'input_columns', 'output_columns', 'Solving_Acuracy']
@@ -249,7 +294,8 @@ class PublicAjax(dt.DTView):
         return qs
 
 
-class MyAjax(dt.DTView):
+#@login_required
+class my_ajax(dt.DTView):
     model = models.Batchs
     columns = ['Batch_Id', 'Project_Name','Batch_Version',  'Batch_Received_DateTime', 'Project_Description', 'status', 'input_columns', 'output_columns', 'Solving_Acuracy']
     order_columns = ['Batch_Id', 'Project_Name', 'Batch_Version', 'status']
@@ -257,7 +303,7 @@ class MyAjax(dt.DTView):
 
     def get(self, request):
         self.request = request
-        return super(MyAjax, self).get(request)
+        return super(my_ajax, self).get(request)
 
 
     def filter_queryset(self, qs):
@@ -284,31 +330,73 @@ class MyAjax(dt.DTView):
         return qs
 
 
-class Send2Ajax(dt.DTView):
+#@login_required
+class send2_id_ajax(dt.DTView):
     def get(self, request, batch_id):
         # Query from table BATCH_INPUT_NNN
         # without pk 'index'
         # return JSON
         self.model = models.BatchInput(batch_id)
-        self.columns = [ f.name for f in  self.model._meta.get_fields() ][1:] # without 'index' PK
+        self.columns = self.model.get_field_names(without_pk=True)
         self.order_columns = self.columns
-        return super(Send2Ajax, self).get(request)
+        return super(send2_id_ajax, self).get(request)
 
 
-# tb
-from django import conf
+#@login_required
+class view_id_solved_ajax(dt.DTView):
+    def get(self, request, batch_id):
+        # Query from table BATCH_INPUT_NNN
+        # without pk 'index'
+        # return JSON
+        model_solved = models.BatchSolved(batch_id)
+        self.model =  model_solved
+        self.columns = model_solved.get_field_names(without_pk=True)
+        self.order_columns = self.columns
+        res = super(view_id_solved_ajax, self).get(request)
+        return super(view_id_solved_ajax, self).get(request)
 
-def include_raw(path):
-    import os.path
 
-    for template_dir in conf.settings.TEMPLATES[0]['DIRS']:
-        filepath = '%s/%s' % (template_dir, path)
-        if os.path.isfile(filepath):
-            break
+@login_required
+def view_export_input_csv(request, batch_id):
+    from djqscsv import render_to_csv_response
 
-    with open(filepath, 'rb') as fp:
-        return fp.read()
+    model = models.BatchInput(batch_id)
+    qs = model.objects.all()
+    header = model.get_header_map()
+    return render_to_csv_response(qs, field_header_map=header)
 
-def tb(request, batch_id):
-    return render(request, 'view_tb.html')
 
+@login_required
+def view_export_solved_csv(request, batch_id):
+    from djqscsv import render_to_csv_response
+
+    model = models.BatchSolved(batch_id)
+    qs = model.objects.all()
+    header = model.get_header_map()
+    return render_to_csv_response(qs, field_header_map=header)
+
+
+@login_required
+def view_export_input_xls(request, batch_id):
+    from excel_response import ExcelResponse
+    model = models.BatchInput(batch_id)
+    qs = model.objects.all()
+    return ExcelResponse(qs)
+
+
+@login_required
+def view_export_solved_xls(request, batch_id):
+    from excel_response import ExcelResponse
+    model = models.BatchSolved(batch_id)
+    qs = model.objects.all()
+    return ExcelResponse(qs)
+
+
+
+def redirect_view(request, prefix=None, tail=None, batch_id=None):
+    from django.http import HttpResponseRedirect, Http404
+    if tail:
+        #response = redirect('/static/' + tail)
+        return HttpResponseRedirect('/static/' + prefix + '/' + tail)
+    else:
+        raise Http404

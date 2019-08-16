@@ -5,6 +5,9 @@ django-widget-tweaks==1.4.5
 #django-viewflow
 django-material==1.5.8
 django-datatables-view
+django-queryset-csv
+django-excel-response
+#django-export-xls
 mysqlclient
 SQLAlchemy
 jsonfield

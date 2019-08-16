@@ -1,60 +1,63 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %} view {% endblock %}
+
 {% block content %}
+  <div class="row">
+    <div class="col s12">
+      <ul class="tabs">
+        <li class="tab col s2"><a href="#page1">Project data</a></li>
+        <li class="tab col s2"><a href="#page2">Data Input</a></li>
+        <li class="tab col s2"><a href="#page3">Data-SOLVED</a></li>
+        <li class="tab col s2"><a href="#page4">Solving Informations</a></li>
+        <li class="tab col s2"><a href="#page5">Graph</a></li>
+        <li class="tab col s2"><a href="#page6">TensorBoard</a></li>
+      </ul>
+    </div>
 
+    <div id="page1" class="col s12">
+        {% include "view_project_data.html" %}
+    </div>
 
-<h4>Name: {{ batch.Project_Name }}</h4>
-<div class="row">
-    <div class="col-2">Received DateTime:</div>
-    <div> {{ batch.Batch_Received_DateTime|date:'Y-m-d H:i' }}</div>
-</div>
-<div class="row">
-    <div class="col-2">Description:</div>
-    <div> {{ batch.Project_Description }}</div>
-</div>
-<div class="row">
-    <div class="col-2">Status:</div>
-    <div></div>
-</div>
-<div class="row mb-1">
-    <div class="col-2">Version:</div>
-    <div></div>
-</div>
+    <div id="page2" class="col s12">
+        {% include "view_data_input.html" %}
+    </div>
 
-<!-- Raw -->
-<!-- View first 5 lines and last 5 lines of csv -->
-<table class="responsive-table">
-    <thead>
-    <tr>
-    {% for name in data_titles %}
-        <th>{{ name }}</th>
-    {% endfor %}
-    </tr>
-    </thead>
-    <tbody>
-    {% for row in data_head %}
-    <tr>
-        {% for dada in row %}
-            <td>{{ dada }}</td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
+    <div id="page3" class="col s12">
+        {% include "view_data_solved.html" %}
+    </div>
 
-    <tr>
-        {% for row in data_titles %}
-        <td>...</td>
-        {% endfor %}
-    </tr>
+    <div id="page4" class="col s12">
+        {% include "view_solving_informations.html" %}
+    </div>
 
-    {% for row in data_tail %}
-    <tr>
-        {% for dada in row %}
-            <td>{{ dada }}</td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <div id="page5" class="col s12">
+        {% include "view_graph.html" %}
+    </div>
 
+    <div id="page6" class="col s12" style="margin:0; padding: 0;">
+        {% include "view_tensorboard.html" %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" language="javascript">
+    // tabs
+    $(document).ready(function(){
+        $('.tabs').tabs();
+    });
+</script>
+
+<script type="text/javascript" language="javascript">
+    // on tab change
+    $(document).ready(function(){
+        $('ul.tabs').on('click', 'a', function(e) {
+            if (this.href.find('#page6')) {
+                //
+            }
+        });
+    });
+</script>
 {% endblock %}
