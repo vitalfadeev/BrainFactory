@@ -7,6 +7,9 @@
 
 
 {% block content %}
+{% url 'send2/id/ajax' batch.Batch_Id as ajax_url %}
+{% include "datatables.html" with ajax_url=ajax_url table="#send2-table" page_length=5 %}
+
 <style>
 .container {
     margin: 20px;
@@ -119,56 +122,6 @@
   $(document).ready(function(){
     $('select').formSelect();
   });
-</script>
-
-{% block extracss %}
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
-{% endblock extracss %}
-
-{% block extrajs %}
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
-{% endblock extrajs %}
-
-<script type="text/javascript" language="javascript" class="init">
-// table
-$(document).ready(function() {
-    var USERS_LIST_JSON_URL = '{% url "send2/id/ajax"  batch.Batch_Id %}';
-    // translations for datatables
-    var oLanguages = {
-        oPaginate:{
-            sFirst:'<<',
-            sLast: '>>',
-            sNext: '>',
-            sPrevious: '<'
-        },
-        sInfo:          "Showing _START_ to _END_ of _TOTAL_ entries",
-        sInfoEmpty:     "No entries to show",
-        sInfoFiltered:  "(filtered from _MAX_ total entries)",
-        sLengthMenu:    "Show _MENU_ entries",
-        sProcessing:    "Processing",
-        sSearch:        "Filter records:",
-        sZeroRecords:   "No data to show"
-    };
-
-    var dt_table = $('#send2-table').dataTable({
-        "pageLength": 5,
-        "lengthChange": false,
-        "searching": false,
-        "oLanguage": oLanguages,
-        "info" : false,
-        "bInfo" : false,
-        "ordering": false,
-        "bFilter": true,
-        "aLengthMenu": [[25, 50, 100, 200], [25, 50, 100, 200]],
-        "iDisplayLength" : 5,
-        //"aaSorting": [[ 0, "desc" ]],
-        "bAutoWidth": true,
-        "bProcessing": true,
-        "bServerSide": true,
-        "bStateSave": true,
-        "sAjaxSource": USERS_LIST_JSON_URL
-    });
-});
 </script>
 
 {% endblock %}

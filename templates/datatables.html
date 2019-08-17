@@ -1,0 +1,50 @@
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'datatable/datatables.min.css' %}"/>
+{% endblock css %}
+
+{% block js %}
+<script type="text/javascript" src="{% static 'datatable/datatables.min.js' %}"></script>
+{% endblock js %}
+
+<script type="text/javascript" language="javascript" class="init">
+// table
+$(document).ready(function() {
+    // translations for datatables
+    var oLanguages = {
+        oPaginate:{
+            sFirst:'<<',
+            sLast: '>>',
+            sNext: '>',
+            sPrevious: '<'
+        },
+        sInfo:          "Showing _START_ to _END_ of _TOTAL_ entries",
+        sInfoEmpty:     "No entries to show",
+        sInfoFiltered:  "(filtered from _MAX_ total entries)",
+        sLengthMenu:    "Show _MENU_ entries",
+        sProcessing:    "Processing",
+        sSearch:        "Filter records:",
+        sZeroRecords:   "No data to show"
+    };
+
+    var dt_table = $('{{ table }}').dataTable({
+        "pageLength": {{ page_length }},
+        "iDisplayLength" : {{ page_length }},
+        "lengthChange": false,
+        "searching": false,
+        "oLanguage": oLanguages,
+        "info" : false,
+        "bInfo" : false,
+        "ordering": false,
+        "bFilter": true,
+        "aLengthMenu": [[25, 50, 100, 200], [25, 50, 100, 200]],
+        "aaSorting": [[ 0, "desc" ]],
+        "bAutoWidth": true,
+        "bProcessing": true,
+        "bServerSide": true,
+        "bStateSave": true,
+        "sAjaxSource": '{{ ajax_url }}'
+    });
+});
+</script>

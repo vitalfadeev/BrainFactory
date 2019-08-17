@@ -7,14 +7,5 @@
     width: 100%;
 }
 </style>
-<script>
-function resizeIframe(obj) {
-    var intervalID = setInterval(function() {
-        obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
-        obj.style.width = '100%';
-        // clearInterval(intervalID);
-    }, 1000);
-    // onload="resizeIframe(this)"
-}
-</script>
+
 <iframe src="{% url 'view_tensorboard_self' batch.Batch_Id %}" frameborder="0" scrolling="no" id="tf-frame"/>

@@ -3,35 +3,43 @@
 {% load socialaccount %}
 {% user_display user as user_display %}
 
-    <header class="">
-        <nav class="nav-wrapper">
-          <a class="brand-logo" href="/public">iXiOO Logo</a>
-          <ul id="nav-mobile" class="right hide-on-med-and-down">
-              {% if user.is_authenticated %}
+<header class="" id="header">
+    <nav class="nav-wrapper">
+      <a class="brand-logo" href="{% url 'public' %}">iXiOO Logo</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+          {% if user.is_authenticated %}
+          {% else %}
+              <li><a href="{% url 'account_login' %}">Sign in</a></li>
+              <li><a href="{% url 'account_signup' %}">Register</a></li>
+          {% endif %}
+          {% if user.is_authenticated %}
+          <!-- Dropdown Trigger -->
+          <li>
+              <a class="dropdown-trigger" href="#" data-target="dropdown1">
+                  {% user_display user %}
+                  <i class="material-icons right">arrow_drop_down</i>
+              </a>
+          </li>
+          <!-- Dropdown Structure -->
+          <ul id="dropdown1" class="dropdown-content">
+              <li><a href="{% url 'my' %}">My data</a></li>
+              {% get_social_accounts user as accounts %}
+              {% if accounts %}
               {% else %}
-                  <li><a href="{% url 'account_login' %}">Sign in</a></li>
-                  <li><a href="{% url 'account_signup' %}">Register</a></li>
+              <li><a href="{% url 'account_change_password' %}">Change password</a></li>
               {% endif %}
-              {% if user.is_authenticated %}
-              <!-- Dropdown Trigger -->
-              <li>
-                  <a class="dropdown-trigger" href="#!" data-target="dropdown1">
-                      {% user_display user %}
-                      <i class="material-icons right">arrow_drop_down</i>
-                  </a>
-              </li>
-              <!-- Dropdown Structure -->
-              <ul id="dropdown1" class="dropdown-content">
-                  <li><a href="{% url 'my' %}">My data</a></li>
-                  {% get_social_accounts user as accounts %}
-                  {% if accounts %}
-                  {% else %}
-                  <li><a href="{% url 'account_change_password' %}">Change password</a></li>
-                  {% endif %}
-                  <li class="divider"></li>
-                  <li><a href="{% url 'account_logout' %}">Log out</a></li>
-              </ul>
-              {% endif %}
+              <li class="divider"></li>
+              <li><a href="{% url 'account_logout' %}">Log out</a></li>
           </ul>
-        </nav>
-    </header>
+          {% endif %}
+      </ul>
+    </nav>
+</header>
+
+
+<!-- Menu --->
+<script>
+$(document).ready(function() {
+    $("#header .dropdown-trigger").dropdown();
+});
+</script>

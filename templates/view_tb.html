@@ -3,7 +3,7 @@
 
 {% block title %} TensorBoard {% endblock %}
 
-{% block extrajs %}
+{% block js %}
 <script>
 $(document).ready(function(){
     $.get( "{% static "tensorboard/engine.html" %}", function( data ) {
