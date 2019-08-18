@@ -186,7 +186,7 @@ def send3(request, batch_id):
     return HttpResponse(template.render(context, request))
 
 
-#@login_required
+@login_required
 def view(request, batch_id):
     from django.http import HttpResponseRedirect, Http404
     from . import models
@@ -254,17 +254,11 @@ def view_tb_self(request, batch_id):
 
 
 def serve_file(filename):
-    response = HttpResponse(mimetype="text/html")
-    for line in open(filename):
-        response.write(line)
-    return response
-
-def serve_file2(filename):
     image_data = open(filename, "rb").read()
     return HttpResponse(image_data, content_type="text/html")
 
 def view_tb_static(request, batch_id=None):
-    return serve_file2(settings.BASE_DIR + '/static/tensorboard/index.html')
+    return serve_file(settings.BASE_DIR + '/static/tensorboard/index.html')
 
 
 # public
@@ -392,11 +386,9 @@ def view_export_solved_xls(request, batch_id):
     return ExcelResponse(qs)
 
 
-
 def redirect_view(request, prefix=None, tail=None, batch_id=None):
     from django.http import HttpResponseRedirect, Http404
     if tail:
-        #response = redirect('/static/' + tail)
         return HttpResponseRedirect('/static/' + prefix + '/' + tail)
     else:
         raise Http404
