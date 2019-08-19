@@ -42,6 +42,9 @@ urlpatterns = [
                                             views.view_export_input_xls,                name='view_export_input_xls'),
     path('view/<int:batch_id>/export/solved/xls',
                                             views.view_export_solved_xls,               name='view_export_solved_xls'),
+    path('view/<int:batch_id>/graph',
+                                            views.view_graph,                           name='view_id_graph'),
+    path('graph',                           views.graph,                                name='graph'),
     # Public
     path("public",                          views.public,                               name="public"),
     path('public/ajax',                     views.PublicAjax.as_view(),                 name="public/ajax"),    # JSON

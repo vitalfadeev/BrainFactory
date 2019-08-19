@@ -66,6 +66,32 @@ class DymoMixin:
         return header
 
 
+    @classmethod
+    def get_column_data(cls, colname):
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT `{}` FROM `{}`}'.format(colname, cls.db_table))
+
+            col = []
+            for row in cursor.fetchall():
+                col.append(row[0])
+
+            return col
+
+
+    @classmethod
+    def as_pandas_dataframe(cls):
+        import pandas
+        from django.db import connection
+
+        with connection.cursor() as cursor:
+            sql = 'SELECT * FROM `{}`'.format(cls._meta.db_table)
+            df = pandas.read_sql_query(
+                sql,
+                connection
+            )
+            return df
+
 #
 # Dynamic model
 #

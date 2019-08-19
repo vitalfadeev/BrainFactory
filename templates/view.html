@@ -11,34 +11,14 @@
         <li class="tab col s2"><a href="#page2">Data Input</a></li>
         <li class="tab col s2"><a href="#page3">Data-SOLVED</a></li>
         <li class="tab col s2"><a href="#page4">Solving Informations</a></li>
-        <li class="tab col s2"><a href="#page5">Graph</a></li>
+        <li class="tab col s2">
+            <a target="_self" class="{% if url_name == 'view_id_graph' %}active{% endif %}" href="{% url 'view_id_graph' batch.Batch_Id %}">Graph</a>
+        </li>
         <li class="tab col s2"><a href="#page6">TensorBoard</a></li>
       </ul>
     </div>
 
-    <div id="page1" class="col s12">
-        {% include "view_project_data.html" %}
-    </div>
-
-    <div id="page2" class="col s12">
-        {% include "view_data_input.html" %}
-    </div>
-
-    <div id="page3" class="col s12">
-        {% include "view_data_solved.html" %}
-    </div>
-
-    <div id="page4" class="col s12">
-        {% include "view_solving_informations.html" %}
-    </div>
-
-    <div id="page5" class="col s12">
-        {% include "view_graph.html" %}
-    </div>
-
-    <div id="page6" class="col s12" style="margin:0; padding: 0;">
-        {% include "view_tensorboard.html" %}
-    </div>
+    {% block view %}{% endblock %}
   </div>
 {% endblock %}
 
@@ -47,17 +27,6 @@
     // tabs
     $(document).ready(function(){
         $('.tabs').tabs();
-    });
-</script>
-
-<script type="text/javascript" language="javascript">
-    // on tab change
-    $(document).ready(function(){
-        $('ul.tabs').on('click', 'a', function(e) {
-            if (this.href.find('#page6')) {
-                //
-            }
-        });
     });
 </script>
 {% endblock %}

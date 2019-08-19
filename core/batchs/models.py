@@ -2,6 +2,7 @@ import sys
 import collections
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 import jsonfield
 from .helpers import uploads_directory_path
 from .validators import validate_file_extension
@@ -202,6 +203,50 @@ class Batchs(models.Model):
         return titles
 
 
+# 10 possible Graph Type
+GRAPH_CHOICES = (
+    ('1',
+        'fig = px.scatter(iris, x="sepal_width", y="sepal_length", color="species")',
+        'note : colors only can have columns of type OPTION or BINARY'
+    ),
+    ('2',
+        'fig = px.scatter(iris, x="sepal_width", y="sepal_length", color="species", marginal_y="rug", marginal_x="histogram")',
+        'note : colors only can have columns of type OPTION or BINARY'
+    ),
+    ('3',
+        'fig = px.scatter(iris, x="sepal_width", y="sepal_length", color="species", marginal_y="violin", marginal_x="box", trendline="ols")',
+        'note : colors only can have columns of type OPTION or BINARY'
+    ),
+    ('4',
+        'fig = px.scatter_matrix(iris, dimensions=["sepal_width", "sepal_length", "petal_width", "petal_length"], color="species")',
+        'note : colors only can have columns of type OPTION or BINARY'
+    ),
+    ('5',
+        'fig = px.parallel_categories(tips, color="size", color_continuous_scale=px.colors.sequential.Inferno)',
+        ''
+    ),
+    ('6',
+        'fig = px.area(gapminder, x="year", y="pop", color="continent", line_group="country")',
+        'note : colors only can have columns of type OPTION or BINARY'
+    ),
+    ('7',
+        'fig = px.density_contour(iris, x="sepal_width", y="sepal_length")',
+        ''
+    ),
+    ('8',
+        'fig = px.density_heatmap(iris, x="sepal_width", y="sepal_length", marginal_x="rug", marginal_y="histogram")',
+        ''
+    ),
+    ('9',
+        'fig = px.histogram(tips, x="total_bill", y="tip", color="sex", marginal="rug", hover_data=tips.columns)',
+        'note : colors only can have columns of type OPTION or BINARY'
+    ),
+    ('10',
+        'fig = px.scatter_3d(election, x="Joly", y="Coderre", z="Bergeron", color="winner", size="total", hover_name="district", symbol="result", color_discrete_map = {"Joly": "blue", "Bergeron": "green", "Coderre":"red"})',
+        'note : colors only can have columns of type OPTION or BINARY'
+    ),
+)
+
 def BatchInput(batch_id):
     """
     Dynamic model factory
@@ -238,3 +283,17 @@ def BatchSolved(batch_id):
     )
 
     return cls
+
+
+class Graphs(models.Model):
+    Batch_Id        = models.OneToOneField(Batchs, on_delete=models.CASCADE, primary_key=True)
+    GraphType       = models.CharField(max_length=255, default=GRAPH_CHOICES[0][0], choices=two_cols(GRAPH_CHOICES))
+    X               = models.CharField(max_length=255, choices=(('', ''),), default='')
+    Y               = models.CharField(max_length=255, choices=(('', ''),), default='')
+    Z               = models.CharField(max_length=255, choices=(('', ''),), default='')
+    color           = models.CharField(max_length=255, choices=(('', ''),), default='')
+    Animation_Frame = models.CharField(max_length=255)
+    ColorScales     = models.IntegerField(default=0)
+
+    def get_absolute_url(self):
+        return reverse('graph', kwargs={'pk': self.pk})

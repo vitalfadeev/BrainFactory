@@ -47,7 +47,6 @@ def public(request):
 @login_required
 def send(request):
     from django.http import HttpResponseRedirect
-
     return HttpResponseRedirect('/send1')
 
 
@@ -57,7 +56,7 @@ def send1(request):
     from . import forms
     from . import helpers
 
-    # if this is a POST request we need to process the form data
+    # POST
     if request.method == 'POST':
         form = forms.SendForm1(request.POST, request.FILES)
 
@@ -73,7 +72,7 @@ def send1(request):
 
             return HttpResponseRedirect('/send2/{}'.format(batch.Batch_Id))
 
-    # if a GET (or any other method) we'll create a blank form
+    # GET
     else:
         form = forms.SendForm1()
 
@@ -392,3 +391,96 @@ def redirect_view(request, prefix=None, tail=None, batch_id=None):
         return HttpResponseRedirect('/static/' + prefix + '/' + tail)
     else:
         raise Http404
+
+
+@login_required
+def view_graph(request, batch_id):
+    from django.http import HttpResponseRedirect, Http404
+    from . import forms
+
+    # get data
+    batch = models.Batchs.objects.get(Batch_Id=batch_id)
+
+    try:
+        instance = models.Graphs.objects.get(Batch_Id=batch_id)
+    except models.Graphs.DoesNotExist:
+        instance = None
+
+    # POST
+    if request.method == 'POST':
+        form = forms.GraphForm(batch_id, request.POST)
+
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.Batch_Id = batch.Batch_Id
+            instance.save()
+            #return HttpResponseRedirect('/send2/{}'.format(batch.Batch_Id))
+
+    # GET
+    else:
+        form = forms.GraphForm(batch_id=batch_id, instance=instance)
+
+    # render
+    from django.urls import resolve
+    url_name = resolve(request.path_info).url_name
+
+    x = form..X
+    y = instance.Y
+
+    # graph
+    graph_div = g1(batch_id, x, y)
+
+    context = {
+        'batch'     : batch,
+        'form'      : form,
+        'url_name'  : url_name,
+        'graph'     : graph,
+    }
+
+    return render(request, 'view_graph.html', context)
+
+
+@login_required
+def graph(request):
+    import plotly.offline as opy
+    import plotly.graph_objs as go
+
+    # from columns
+    x = request.GET['X']
+    y = request.GET['Y']
+    div = g1(73, '"age"', '"sex"')
+
+    context = {
+        'graph': div
+    }
+
+    return render(request, 'graph.html', context)
+
+def g1(batch_id, x, y):
+    import plotly.express as px
+    import plotly.offline as opy
+
+    input_model = models.BatchInput(batch_id)
+    df = input_model.as_pandas_dataframe()
+
+    fig = px.scatter(df, x=x, y=y)
+    div = opy.plot(fig, auto_open=False, output_type='div')
+
+    return div
+
+
+
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+
+class AuthorCreate(CreateView):
+    model = models.Graphs
+    fields = ['name']
+
+class AuthorUpdate(UpdateView):
+    model = models.Graphs
+    fields = ['name']
+
+class AuthorDelete(DeleteView):
+    model = models.Graphs
+    success_url = reverse_lazy('author-list')

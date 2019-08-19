@@ -1,13 +1,42 @@
+{% extends 'view.html' %}
 {% load static %}
+{% load material_form %}
 
-{% block content %}
+{% block view %}
 
-<div class="container">
-    <div class="">
-        <div class="row">
-            <div class="col s12 center-align">The Graph</div>
+<div>
+    <style>
+    .row {
+        margin-bottom: 0;
+    }
+    </style>
+
+    <div class="col s3">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% form form=form %}{% endform %}
+
+            <div class="right-align">
+                <button type="submit" name="_submit" class="btn">Draw graph</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col s9">
+        <div id="graph">
+            <!-- Graph -->
+            {{ graph_div|safe }}
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block js %}
+<script>
+  // selects
+  $(document).ready(function(){
+    $('select').formSelect();
+  });
+</script>
 {% endblock %}

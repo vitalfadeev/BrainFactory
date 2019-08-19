@@ -245,3 +245,67 @@ class SendForm3(forms.ModelForm):
             instance.ParameterCNN_Shape.append((vn, vc)) 
         instance.save()
         return instance
+
+
+class GraphForm(forms.ModelForm):
+    class Meta:
+        model = models.Graphs
+
+        fields = (
+            'GraphType',
+            'X',
+            'Y',
+            'Z',
+            'color',
+            'Animation_Frame',
+            'ColorScales',
+        )
+        fields_required = []
+        labels = {
+            'GraphType'         :'Graph Type',
+            'X'                 :'X',
+            'Y'                 :'Y',
+            'Z'                 :'Z',
+            'color'             :'color',
+            'Animation_Frame'   :'Animation Frame',
+            'ColorScales'       :'ColorScales',
+        }
+    layout = Layout(
+        Fieldset('',
+            Row('GraphType'),
+            Row('X', 'Y', 'Z'),
+            Row('color', 'ColorScales'),
+            Row('Animation_Frame'),
+        ),
+    )
+
+    def __init__(self, batch_id, *args, **kwargs):
+        super(GraphForm, self).__init__(*args, **kwargs)
+        model = models.BatchInput(batch_id)
+        columns = self._get_choices_fields(model)
+        self.fields['X'].choices = columns
+        self.fields['Y'].choices = columns
+        self.fields['Z'].choices = columns
+        self.fields['color'].choices = self._get_color_columns(model, batch_id)
+
+
+    def _get_choices_fields(self, model):
+        #flds = model.get_field_names(without_pk=True)
+        cols = model.get_column_names(without_pk=True)
+        return list(zip(cols, cols))
+
+
+    def _get_color_columns(self, model, batch_id):
+        batch = models.Batchs.objects.get(Batch_Id=batch_id)
+        types = batch.types
+
+        # type only: 'OPTION', 'BINARY'
+        columns = batch.titles
+        color_columns = [col for col in columns if col in ['OPTION', 'BINARY'] ]
+
+        # inputs only
+        #inputs = batch.input_columns
+        #color_columns = [ col for col in color_columns if col in inputs ]
+
+        return color_columns
+
