@@ -286,7 +286,7 @@ def BatchSolved(batch_id):
 
 
 class Graphs(models.Model):
-    Batch_Id        = models.ForeignKey(Batchs, on_delete=models.CASCADE, primary_key=True)
+    Batch_Id        = models.OneToOneField(Batchs, on_delete=models.CASCADE, primary_key=True)
     GraphType       = models.CharField(max_length=255, default=GRAPH_CHOICES[0][0], choices=two_cols(GRAPH_CHOICES))
     X               = models.CharField(max_length=255, default='')
     Y               = models.CharField(max_length=255, default='')
