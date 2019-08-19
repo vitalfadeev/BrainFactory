@@ -1,4 +1,7 @@
+{% extends 'view.html' %}
 {% load static %}
+
+{% block view %}
 
 <!-- TB frame -->
 <style>
@@ -8,4 +11,6 @@
 }
 </style>
 
-<iframe src="{% url 'view_tensorboard_self' batch.Batch_Id %}" frameborder="0" scrolling="no" id="tf-frame"/>
+<iframe src="{% url 'view_tensorboard_engine' batch_id %}" frameborder="0" scrolling="no" id="tf-frame"/>
+
+{% endblock %}

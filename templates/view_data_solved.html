@@ -1,7 +1,8 @@
+{% extends 'view.html' %}
 {% load static %}
 
-{% block content %}
-{% url 'view/id/solved/ajax' batch.Batch_Id as ajax_url %}
+{% block view %}
+{% url 'view/id/solved/ajax' batch_id as ajax_url %}
 {% include "datatables.html" with ajax_url=ajax_url table="#data-solved-table" page_length=25 %}
 
 <div class="">
@@ -28,7 +29,7 @@
         </table>
 
         <div class="">
-            <a href="{% url "view_export_solved_csv" batch.Batch_Id %}" class="">Download File data in CSV/XLS</a>
+            <a href="{% url "view_export_solved_csv" batch_id %}" class="">Download File data in CSV/XLS</a>
         </div>
 
         {% else %}

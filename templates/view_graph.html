@@ -1,6 +1,5 @@
 {% extends 'view.html' %}
 {% load static %}
-{% load material_form %}
 
 {% block view %}
 
@@ -15,7 +14,47 @@
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-            {% form form=form %}{% endform %}
+            <div class="row">
+                <div class="col s12">
+                    {{ form.GraphType.label_tag }}
+                    {{ form.GraphType }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s4">
+                    {{ form.X.label_tag }}
+                    {{ form.X }}
+                </div>
+                <div class="col s4">
+                    {{ form.Y.label_tag }}
+                    {{ form.Y }}
+                </div>
+                <div class="col s4">
+                    {{ form.Z.label_tag }}
+                    {{ form.Z }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12">
+                    {{ form.color.errors }}
+                    {{ form.color.label_tag }}
+                    {{ form.color }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12">
+                    {{ form.Animation_Frame.errors }}
+                    {{ form.Animation_Frame.label_tag }}
+                    {{ form.Animation_Frame }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12">
+                    {{ form.ColorScales.errors }}
+                    {{ form.ColorScales.label_tag }}
+                    {{ form.ColorScales }}
+                </div>
+            </div>
 
             <div class="right-align">
                 <button type="submit" name="_submit" class="btn">Draw graph</button>

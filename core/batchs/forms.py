@@ -270,23 +270,29 @@ class GraphForm(forms.ModelForm):
             'Animation_Frame'   :'Animation Frame',
             'ColorScales'       :'ColorScales',
         }
-    layout = Layout(
-        Fieldset('',
-            Row('GraphType'),
-            Row('X', 'Y', 'Z'),
-            Row('color', 'ColorScales'),
-            Row('Animation_Frame'),
-        ),
-    )
 
     def __init__(self, batch_id, *args, **kwargs):
         super(GraphForm, self).__init__(*args, **kwargs)
+
         model = models.BatchInput(batch_id)
+
         columns = self._get_choices_fields(model)
-        self.fields['X'].choices = columns
-        self.fields['Y'].choices = columns
-        self.fields['Z'].choices = columns
-        self.fields['color'].choices = self._get_color_columns(model, batch_id)
+        color_columns = self._get_color_columns(model, batch_id)
+
+        self.fields['X'] = forms.ChoiceField(choices = columns)
+        self.fields['Y'] = forms.ChoiceField(choices = columns)
+        self.fields['Z'] = forms.ChoiceField(choices = columns)
+        self.fields['color'] = forms.ChoiceField(choices = columns)
+
+        if 'instance' not in kwargs:
+            if len(columns) >= 1:
+                self.initial['X'] = columns[0][0]
+            if len(columns) >= 2:
+                self.initial['Y'] = columns[1][0]
+            if len(columns) >= 3:
+                self.initial['Z'] = columns[2][0]
+            if len(color_columns) >= 1:
+                self.initial['color'] = color_columns[0][0]
 
 
     def _get_choices_fields(self, model):
@@ -309,3 +315,7 @@ class GraphForm(forms.ModelForm):
 
         return color_columns
 
+
+    #def is_valid(self, *args, **kwargs):
+    #    super(GraphForm, self).is_valid(*args, **kwargs)
+    #    #return True

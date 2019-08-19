@@ -1,13 +1,25 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic import DetailView
+from django.utils.decorators import method_decorator
+from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_GET
+from django.http import HttpResponseForbidden
+from django.urls import resolve
+from django.urls import reverse
+from django.views.generic import FormView
+from django.views.generic.detail import SingleObjectMixin
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.template import loader
 from django.conf import settings
 from django.views.generic import TemplateView
+from django.views import View
 from django import conf
 from django.shortcuts import redirect
 from . import models
+from . import forms
 from . import dt
 
 
@@ -242,24 +254,6 @@ def view(request, batch_id):
     return HttpResponse(template.render(context, request))
 
 
-@login_required
-def view_tb(request, batch_id):
-    return render(request, 'view_tb.html')
-
-
-@login_required
-def view_tb_self(request, batch_id):
-    return render(request, 'view_tb_self.html')
-
-
-def serve_file(filename):
-    image_data = open(filename, "rb").read()
-    return HttpResponse(image_data, content_type="text/html")
-
-def view_tb_static(request, batch_id=None):
-    return serve_file(settings.BASE_DIR + '/static/tensorboard/index.html')
-
-
 # public
 class PublicAjax(dt.DTView):
     model = models.Batchs
@@ -393,94 +387,260 @@ def redirect_view(request, prefix=None, tail=None, batch_id=None):
         raise Http404
 
 
-@login_required
-def view_graph(request, batch_id):
-    from django.http import HttpResponseRedirect, Http404
-    from . import forms
+class ProjectView(DetailView):
+    def get(self, request, batch_id, *args, **kwargs):
+        context = {
+            "batch_id": batch_id,
+            'url_name': resolve(request.path_info).url_name,
+        }
+        return render(request, 'view_project_data.html', context)
 
-    # get data
-    batch = models.Batchs.objects.get(Batch_Id=batch_id)
 
-    try:
-        instance = models.Graphs.objects.get(Batch_Id=batch_id)
-    except models.Graphs.DoesNotExist:
-        instance = None
+class DataInputView(DetailView):
+    def get(self, request, batch_id, *args, **kwargs):
+        from django.http import HttpResponseRedirect, Http404
+        from . import models
 
-    # POST
-    if request.method == 'POST':
-        form = forms.GraphForm(batch_id, request.POST)
+        # check access
+        batch = models.Batchs.objects.get(Batch_Id=batch_id)
+
+        if batch.Project_IsPublic:
+            pass
+        else:
+            if batch.User_ID == request.user:
+                pass
+            else:
+                raise Http404
+
+        # input
+        titles = batch.titles
+
+        errors = batch.errors
+        error_dataset = batch.AnalysisSource_Errors.get("DATASET", "")
+        warnings = batch.warnings
+        types = batch.types
+
+        # solved
+        model_solved = models.BatchSolved(batch.Batch_Id)
+
+        is_data_solved = model_solved.has_table()
+
+        if is_data_solved:
+            titles_solved = model_solved.get_column_names(without_pk=True)
+            types_solved = model_solved.get_column_types(without_pk=True)
+        else:
+            titles_solved = []
+            types_solved = []
+
+        template = loader.get_template('view.html')
+
+        context = {
+            "batch_id": batch_id,
+            'titles': titles,
+            'has_errors': any(errors),
+            'errors': errors,
+            'error_dataset': error_dataset,
+            'has_warnings': any(warnings),
+            'warnings': warnings,
+            'types': types,
+            'is_data_solved': is_data_solved,
+            'titles_solved': titles_solved,
+            'types_solved': types_solved,
+            'url_name': resolve(request.path_info).url_name,
+        }
+        return render(request, 'view_data_input.html', context)
+
+
+class DataSolvingView(DetailView):
+    def get(self, request, batch_id, *args, **kwargs):
+        context = {
+            "batch_id": batch_id,
+            'url_name': resolve(request.path_info).url_name,
+        }
+        return render(request, 'view_data_solved.html', context)
+
+
+class SolvingView(DetailView):
+    def get(self, request, batch_id, *args, **kwargs):
+        from django.http import HttpResponseRedirect, Http404
+        from . import models
+
+        # check access
+        batch = models.Batchs.objects.get(Batch_Id=batch_id)
+
+        if batch.Project_IsPublic:
+            pass
+        else:
+            if batch.User_ID == request.user:
+                pass
+            else:
+                raise Http404
+
+        # render
+        # input
+        titles = batch.titles
+
+        errors = batch.errors
+        error_dataset = batch.AnalysisSource_Errors.get("DATASET", "")
+        warnings = batch.warnings
+        types = batch.types
+
+        # solved
+        model_solved = models.BatchSolved(batch.Batch_Id)
+
+        is_data_solved = model_solved.has_table()
+
+        if is_data_solved:
+            titles_solved = model_solved.get_column_names(without_pk=True)
+            types_solved = model_solved.get_column_types(without_pk=True)
+        else:
+            titles_solved = []
+            types_solved = []
+
+        template = loader.get_template('view.html')
+
+        context = {
+            'batch': batch,
+            'batch_id': batch_id,
+            'titles': titles,
+            'has_errors': any(errors),
+            'errors': errors,
+            'error_dataset': error_dataset,
+            'has_warnings': any(warnings),
+            'warnings': warnings,
+            'types': types,
+            'is_data_solved': is_data_solved,
+            'titles_solved': titles_solved,
+            'types_solved': types_solved,
+            'url_name': resolve(request.path_info).url_name,
+        }
+        return render(request, 'view_solving_informations.html', context)
+
+
+@method_decorator(login_required, name='dispatch')
+class GraphView(FormView):
+    model = models.Graphs
+    pk_url_kwarg = 'batch_id'
+    form_class = forms.GraphForm
+    template_name = 'view_graph.html'
+
+    def get(self, request, batch_id, *args, **kwargs):
+        from . import graphs
+
+        self.batch_id = batch_id
+        try:
+            instance = models.Graphs.objects.get(Batch_Id=batch_id)
+            form = self.form_class(batch_id, instance=instance)
+            GraphType = instance.GraphType
+            x = instance.X
+            y = instance.Y
+            color = instance.color
+
+        except models.Graphs.DoesNotExist:
+            form = self.form_class(batch_id, initial=self.initial)
+            GraphType = form.initial.GraphType
+            x = form.initial['X']
+            y = form.initial['Y']
+            color = form.initial['color']
+
+        try:
+            if GraphType == "1":
+                graph_div = graphs.g1(batch_id, x, y, color)
+            elif GraphType == "2":
+                graph_div = graphs.g2(batch_id, x, y, color)
+            elif GraphType == "3":
+                graph_div = graphs.g3(batch_id, x, y, color)
+            elif GraphType == "4":
+                x1 = ''
+                y1 = ''
+                x2 = ''
+                y2 = ''
+                graph_div = graphs.g4(batch_id, x1, y1, x2, y2, color)
+            elif GraphType == "5":
+                graph_div = graphs.g5(batch_id, color)
+            elif GraphType == "6":
+                line_group = ''
+                graph_div = graphs.g6(batch_id, x, y, color, line_group)
+            elif GraphType == "7":
+                graph_div = graphs.g7(batch_id, x, y)
+            elif GraphType == "8":
+                graph_div = graphs.g8(batch_id, x, y)
+            elif GraphType == "9":
+                graph_div = graphs.g9(batch_id, x, y)
+            elif GraphType == "10":
+                z = ''
+                graph_div = graphs.g10(batch_id, x, y, z, color)
+            else:
+                graph_div = ''
+
+        except ValueError:
+            graph_div = """<div class="valign-wrapper">
+                                <div class="center-align">
+                                    error
+                                </div>
+                            </div>
+                        """
+
+        except:
+            graph_div = """<div class="valign-wrapper">
+                                <div class="center-align">
+                                    error
+                                </div>
+                            </div>
+                        """
+
+        context = {
+            'form': form,
+            'batch_id': batch_id,
+            'graph_div': graph_div,
+            'url_name': resolve(request.path_info).url_name,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, batch_id, *args, **kwargs):
+        self.batch_id = batch_id
+
+        try:
+            instance = models.Graphs.objects.get(Batch_Id=batch_id)
+            form = self.form_class(batch_id, request.POST)
+
+        except models.Graphs.DoesNotExist:
+            form = self.form_class(batch_id, request.POST)
+
 
         if form.is_valid():
             instance = form.save(commit=False)
-            instance.Batch_Id = batch.Batch_Id
+            batch = models.Batchs.objects.get(Batch_Id=batch_id)
+            instance.Batch_Id = batch
             instance.save()
-            #return HttpResponseRedirect('/send2/{}'.format(batch.Batch_Id))
+            url = self.get_success_url()
+            return HttpResponseRedirect(url)
+        else:
+            return self.form_invalid(form)
 
-    # GET
-    else:
-        form = forms.GraphForm(batch_id=batch_id, instance=instance)
+    def get_form(self, form_class=None):
+        return self.form_class(self.batch_id, **self.get_form_kwargs())
 
-    # render
-    from django.urls import resolve
-    url_name = resolve(request.path_info).url_name
-
-    x = form..X
-    y = instance.Y
-
-    # graph
-    graph_div = g1(batch_id, x, y)
-
-    context = {
-        'batch'     : batch,
-        'form'      : form,
-        'url_name'  : url_name,
-        'graph'     : graph,
-    }
-
-    return render(request, 'view_graph.html', context)
+    def get_success_url(self):
+        return reverse('view_id_graph', kwargs={'batch_id': self.batch_id})
 
 
-@login_required
-def graph(request):
-    import plotly.offline as opy
-    import plotly.graph_objs as go
-
-    # from columns
-    x = request.GET['X']
-    y = request.GET['Y']
-    div = g1(73, '"age"', '"sex"')
-
-    context = {
-        'graph': div
-    }
-
-    return render(request, 'graph.html', context)
-
-def g1(batch_id, x, y):
-    import plotly.express as px
-    import plotly.offline as opy
-
-    input_model = models.BatchInput(batch_id)
-    df = input_model.as_pandas_dataframe()
-
-    fig = px.scatter(df, x=x, y=y)
-    div = opy.plot(fig, auto_open=False, output_type='div')
-
-    return div
+@method_decorator(login_required, name='dispatch')
+class TensorboardView(DetailView):
+    def get(self, request, batch_id, *args, **kwargs):
+        context = {
+            "batch_id": batch_id,
+            'url_name': resolve(request.path_info).url_name,
+        }
+        return render(request, 'view_tensorboard.html', context)
 
 
+def serve_file(filename):
+    image_data = open(filename, "rb").read()
+    return HttpResponse(image_data, content_type="text/html")
 
-from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-class AuthorCreate(CreateView):
-    model = models.Graphs
-    fields = ['name']
+def view_tensorboard_engine(request, batch_id=None):
+    return serve_file(settings.BASE_DIR + '/static/tensorboard/index.html')
 
-class AuthorUpdate(UpdateView):
-    model = models.Graphs
-    fields = ['name']
 
-class AuthorDelete(DeleteView):
-    model = models.Graphs
-    success_url = reverse_lazy('author-list')

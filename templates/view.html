@@ -7,14 +7,36 @@
   <div class="row">
     <div class="col s12">
       <ul class="tabs">
-        <li class="tab col s2"><a href="#page1">Project data</a></li>
-        <li class="tab col s2"><a href="#page2">Data Input</a></li>
-        <li class="tab col s2"><a href="#page3">Data-SOLVED</a></li>
-        <li class="tab col s2"><a href="#page4">Solving Informations</a></li>
         <li class="tab col s2">
-            <a target="_self" class="{% if url_name == 'view_id_graph' %}active{% endif %}" href="{% url 'view_id_graph' batch.Batch_Id %}">Graph</a>
+            <a target="_self"
+               class="{% if url_name == 'view_id_project' %}active{% endif %}"
+               href="{% url 'view_id_project' batch_id %}">Project data</a>
         </li>
-        <li class="tab col s2"><a href="#page6">TensorBoard</a></li>
+        <li class="tab col s2">
+            <a target="_self"
+               class="{% if url_name == 'view_id_data_input' %}active{% endif %}"
+               href="{% url 'view_id_data_input' batch_id %}">Data Input</a>
+        </li>
+        <li class="tab col s2">
+            <a target="_self"
+               class="{% if url_name == 'view_id_data_solving' %}active{% endif %}"
+               href="{% url 'view_id_data_solving' batch_id %}">Data-SOLVED</a>
+        </li>
+        <li class="tab col s2">
+            <a target="_self"
+               class="{% if url_name == 'view_id_solving' %}active{% endif %}"
+               href="{% url 'view_id_solving' batch_id %}">Solving Informations</a>
+        </li>
+        <li class="tab col s2">
+            <a target="_self"
+               class="{% if url_name == 'view_id_graph' %}active{% endif %}"
+               href="{% url 'view_id_graph' batch_id %}">Graph</a>
+        </li>
+        <li class="tab col s2">
+            <a target="_self"
+               class="{% if url_name == 'view_id_tensorboard' %}active{% endif %}"
+               href="{% url 'view_id_tensorboard' batch_id %}">TensorBoard</a>
+        </li>
       </ul>
     </div>
 
