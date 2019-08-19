@@ -199,59 +199,7 @@ def send3(request, batch_id):
 
 @login_required
 def view(request, batch_id):
-    from django.http import HttpResponseRedirect, Http404
-    from . import models
-
-
-    # check access
-    batch = models.Batchs.objects.get(Batch_Id=batch_id)
-
-    if batch.Project_IsPublic:
-        pass
-    else:
-        if batch.User_ID == request.user:
-            pass
-        else:
-            raise Http404
-
-    # render
-    # input
-    titles = batch.titles
-
-    errors        = batch.errors
-    error_dataset = batch.AnalysisSource_Errors.get("DATASET", "")
-    warnings      = batch.warnings
-    types         = batch.types
-
-    # solved
-    model_solved = models.BatchSolved(batch.Batch_Id)
-
-    is_data_solved = model_solved.has_table()
-
-    if is_data_solved:
-        titles_solved = model_solved.get_column_names(without_pk=True)
-        types_solved  = model_solved.get_column_types(without_pk=True)
-    else:
-        titles_solved = []
-        types_solved  = []
-
-    template = loader.get_template('view.html')
-
-    context = {
-        'batch': batch,
-        'titles': titles,
-        'has_errors': any(errors),
-        'errors': errors,
-        'error_dataset': error_dataset,
-        'has_warnings': any(warnings),
-        'warnings': warnings,
-        'types': types,
-        'is_data_solved': is_data_solved,
-        'titles_solved': titles_solved,
-        'types_solved': types_solved,
-    }
-
-    return HttpResponse(template.render(context, request))
+    return HttpResponseRedirect('/view/{}/project'.format(batch_id))
 
 
 # public
