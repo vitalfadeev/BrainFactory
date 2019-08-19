@@ -486,10 +486,8 @@ class GraphView(FormView):
 
         except models.Graphs.DoesNotExist:
             form = self.form_class(batch_id, initial=self.initial)
-            GraphType = form.initial.GraphType
             x = form.initial['X']
             y = form.initial['Y']
-            color = form.initial['color']
 
         try:
             if GraphType == "1":
