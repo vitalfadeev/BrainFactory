@@ -9,6 +9,8 @@ def g1(batch_id, x, y, color):
     df = input_model.as_pandas_dataframe()
 
     fig = px.scatter(df, x=x, y=y, color=color)
+    #fig.update( {'modeBarButtonsToRemove': ['sendDataToCloud', 'hoverCompareCartesian']} )
+    # modeBarButtonsToRemove: ['toImage', 'zoom2d', 'pan', 'pan2d', 'autoScale2d'],
     div = opy.plot(fig, auto_open=False, output_type='div')
 
     return div

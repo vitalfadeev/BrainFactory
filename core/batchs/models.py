@@ -206,23 +206,23 @@ class Batchs(models.Model):
 # 10 possible Graph Type
 GRAPH_CHOICES = (
     ('1',
-        '1',
+        '1 (points)',
         'note : colors only can have columns of type OPTION or BINARY'
     ),
     ('2',
-        '2',
+        '2 (points)',
         'note : colors only can have columns of type OPTION or BINARY'
     ),
     ('3',
-        '3',
+        '3 (points)',
         'note : colors only can have columns of type OPTION or BINARY'
     ),
     ('4',
-        '4',
+        '4 (grid)',
         'note : colors only can have columns of type OPTION or BINARY'
     ),
     ('5',
-        '5',
+        '5 (lines)',
         ''
     ),
     ('6',
@@ -230,11 +230,11 @@ GRAPH_CHOICES = (
         'note : colors only can have columns of type OPTION or BINARY'
     ),
     ('7',
-        '7',
+        '7 (area)',
         ''
     ),
     ('8',
-        '8',
+        '8 (points colored)',
         ''
     ),
     ('9',
@@ -242,7 +242,7 @@ GRAPH_CHOICES = (
         'note : colors only can have columns of type OPTION or BINARY'
     ),
     ('10',
-        '10',
+        '10 (3D)',
         'note : colors only can have columns of type OPTION or BINARY'
     ),
 )
