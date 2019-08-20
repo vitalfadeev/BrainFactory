@@ -92,10 +92,10 @@ def g6(batch_id, x, y, color, line_group, colorset):
     df = input_model.as_pandas_dataframe()
 
     # sorting data frame by name
-    df.sort_values(line_group, axis=0, ascending=True, inplace=True, na_position='last',
-        color_continuous_scale=get_colorset(colorset))
+    #df.sort_values(line_group, axis=0, ascending=True, inplace=True, na_position='last')
 
-    fig = px.area(df, x=x, y=y, color=color, line_group=line_group)
+    fig = px.area(df, x=x, y=y, color=color, line_group=line_group,
+        color_discrete_sequence=get_colorset(colorset))
     div = opy.plot(fig, auto_open=False, output_type='div')
 
     return div
