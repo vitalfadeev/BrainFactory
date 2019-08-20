@@ -4,6 +4,13 @@
 {% block title %} view {% endblock %}
 
 {% block content %}
+    <script type="text/javascript" language="javascript">
+        // tabs
+        $(document).ready(function(){
+            $('.tabs').tabs();
+        });
+    </script>
+
   <div class="row">
     <div class="">
       <ul class="tabs">
@@ -43,10 +50,4 @@
     {% block view %}{% endblock %}
   </div>
 
-    <script type="text/javascript" language="javascript">
-        // tabs
-        $(document).ready(function(){
-            $('.tabs').tabs();
-        });
-    </script>
 {% endblock %}
