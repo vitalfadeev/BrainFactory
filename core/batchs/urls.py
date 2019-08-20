@@ -8,21 +8,18 @@ from . import views
 urlpatterns = [
     # My
     path("my",                              views.my,                                   name="my"),
-    path("my/ajax",                         login_required(views.my_ajax.as_view()),    name="my/ajax"),        # JSON
+    path("my/ajax",                         views.my_ajax.as_view(),                    name="my/ajax"),        # JSON
 
     # Send
     path("send",                            views.send,                                 name="send"),
     path("send1",                           views.send1,                                name="send1"),
     path('send2/<int:batch_id>',            views.send2,                                name='send2'),
-    path('send2/<int:batch_id>/ajax',       login_required(views.send2_id_ajax.as_view()),
-                                                                                        name="send2/id/ajax"),  # JSON
+    path('send2/<int:batch_id>/ajax',       views.send2_id_ajax.as_view(),              name="send2/id/ajax"),  # JSON
     path('send3/<int:batch_id>',            views.send3,                                name='send3'),
 
     # View
     path('view/<int:batch_id>',             views.view,                                 name='view'),
-    path('view/<int:batch_id>/solved/ajax',
-                                            login_required(views.view_id_solved_ajax.as_view()),
-                                                                                        name="view/id/solved/ajax"),  # JSON
+    path('view/<int:batch_id>/solved/ajax', views.view_id_solved_ajax.as_view(),        name="view/id/solved/ajax"),  # JSON
     path('view/<int:batch_id>/export/input/csv',
                                             views.view_export_input_csv,                name='view_export_input_csv'),
     path('view/<int:batch_id>/export/solved/csv',

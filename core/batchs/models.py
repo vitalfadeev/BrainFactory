@@ -285,6 +285,21 @@ def BatchSolved(batch_id):
     return cls
 
 
+COLORSET_CHOICES = (
+    ('1', 'light24'),
+    ('2', 'pastel1'),
+    ('3', 'bold'),
+    ('4', 'inferno'),
+    ('5', 'GnBu'),
+    ('6', 'OrRd'),
+    ('7', 'amp'),
+    ('8', 'ice'),
+    ('9', 'rdbu'),
+    ('10', 'pubu'),
+    ('11', 'red'),
+)
+
+
 class Graphs(models.Model):
     Batch_Id        = models.OneToOneField(Batchs, on_delete=models.CASCADE, primary_key=True)
     GraphType       = models.CharField(max_length=255, default=GRAPH_CHOICES[0][0], choices=two_cols(GRAPH_CHOICES))
@@ -293,4 +308,4 @@ class Graphs(models.Model):
     Z               = models.CharField(max_length=255, default='')
     color           = models.CharField(max_length=255, default='#ccc')
     #Animation_Frame = models.CharField(max_length=255, default="1")
-    #ColorScales     = models.IntegerField(default=0)
+    ColorScales     = models.CharField(max_length=255, default='1', choices=COLORSET_CHOICES)

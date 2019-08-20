@@ -229,7 +229,7 @@ class PublicAjax(dt.DTView):
         return qs
 
 
-#@login_required
+@method_decorator(login_required, name='dispatch')
 class my_ajax(dt.DTView):
     model = models.Batchs
     columns = ['Batch_Id', 'Project_Name','Batch_Version',  'Batch_Received_DateTime', 'Project_Description', 'status', 'input_columns', 'output_columns', 'Solving_Acuracy']
@@ -265,7 +265,7 @@ class my_ajax(dt.DTView):
         return qs
 
 
-#@login_required
+@method_decorator(login_required, name='dispatch')
 class send2_id_ajax(dt.DTView):
     def get(self, request, batch_id):
         # Query from table BATCH_INPUT_NNN
@@ -277,7 +277,7 @@ class send2_id_ajax(dt.DTView):
         return super(send2_id_ajax, self).get(request)
 
 
-#@login_required
+@method_decorator(login_required, name='dispatch')
 class view_id_solved_ajax(dt.DTView):
     def get(self, request, batch_id):
         # Query from table BATCH_INPUT_NNN
@@ -335,6 +335,7 @@ def redirect_view(request, prefix=None, tail=None, batch_id=None):
         raise Http404
 
 
+@method_decorator(login_required, name='dispatch')
 class ProjectView(DetailView):
     def get(self, request, batch_id, *args, **kwargs):
         batch = models.Batchs.objects.get(Batch_Id=batch_id, User_ID=request.user)
@@ -347,6 +348,7 @@ class ProjectView(DetailView):
         return render(request, 'view_project_data.html', context)
 
 
+@method_decorator(login_required, name='dispatch')
 class DataInputView(DetailView):
     def get(self, request, batch_id, *args, **kwargs):
         from django.http import HttpResponseRedirect, Http404
@@ -394,6 +396,7 @@ class DataInputView(DetailView):
         return render(request, 'view_data_input.html', context)
 
 
+@method_decorator(login_required, name='dispatch')
 class DataSolvingView(DetailView):
     def get(self, request, batch_id, *args, **kwargs):
         batch = models.Batchs.objects.get(Batch_Id=batch_id, User_ID=request.user)
@@ -406,6 +409,7 @@ class DataSolvingView(DetailView):
         return render(request, 'view_data_solved.html', context)
 
 
+@method_decorator(login_required, name='dispatch')
 class SolvingView(DetailView):
     def get(self, request, batch_id, *args, **kwargs):
         from django.http import HttpResponseRedirect, Http404
@@ -476,6 +480,7 @@ class GraphView(FormView):
             y = instance.Y
             z = instance.Z
             color = instance.color
+            colorset = instance.ColorScales
 
         except models.Graphs.DoesNotExist:
             form = self.form_class(batch, initial=self.initial)
@@ -484,28 +489,29 @@ class GraphView(FormView):
             y = form.initial['Y']
             z = form.initial['Z']
             color = None
+            colorset = form.initial['ColorScales']
 
         try:
             if GraphType == "1":
-                graph_div = graphs.g1(batch_id, x, y, color)
+                graph_div = graphs.g1(batch_id, x, y, color, colorset)
             elif GraphType == "2":
-                graph_div = graphs.g2(batch_id, x, y, color)
+                graph_div = graphs.g2(batch_id, x, y, color, colorset)
             elif GraphType == "3":
-                graph_div = graphs.g3(batch_id, x, y, color)
+                graph_div = graphs.g3(batch_id, x, y, color, colorset)
             elif GraphType == "4":
-                graph_div = graphs.g4(batch_id, x, y, z, color)
+                graph_div = graphs.g4(batch_id, x, y, z, color, colorset)
             elif GraphType == "5":
-                graph_div = graphs.g5(batch_id, color)
+                graph_div = graphs.g5(batch_id, color, colorset)
             elif GraphType == "6":
-                graph_div = graphs.g6(batch_id, x, y, color, z)
+                graph_div = graphs.g6(batch_id, x, y, color, z, colorset)
             elif GraphType == "7":
-                graph_div = graphs.g7(batch_id, x, y)
+                graph_div = graphs.g7(batch_id, x, y, colorset)
             elif GraphType == "8":
-                graph_div = graphs.g8(batch_id, x, y)
+                graph_div = graphs.g8(batch_id, x, y, colorset)
             elif GraphType == "9":
-                graph_div = graphs.g9(batch_id, x, y, color)
+                graph_div = graphs.g9(batch_id, x, y, color, colorset)
             elif GraphType == "10":
-                graph_div = graphs.g10(batch_id, x, y, z, color)
+                graph_div = graphs.g10(batch_id, x, y, z, color, colorset)
             else:
                 graph_div = ''
 

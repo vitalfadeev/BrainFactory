@@ -258,7 +258,7 @@ class GraphForm(forms.ModelForm):
             'Z',
             'color',
             #'Animation_Frame',
-            #'ColorScales',
+            'ColorScales',
         )
         fields_required = []
         labels = {
@@ -268,7 +268,7 @@ class GraphForm(forms.ModelForm):
             'Z'                 :'Z',
             'color'             :'color',
             #'Animation_Frame'   :'Animation Frame',
-            #'ColorScales'       :'ColorScales',
+            'ColorScales'       :'Color Scales',
         }
 
     def __init__(self, batch, *args, **kwargs):
@@ -296,6 +296,7 @@ class GraphForm(forms.ModelForm):
             if len(color_columns) >= 1:
                 self.initial['color'] = color_columns[0][0]
             self.initial['GraphType'] = "1"
+            self.initial['ColorScales'] = "1"
 
 
     #def is_valid(self, *args, **kwargs):
