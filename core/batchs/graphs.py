@@ -40,14 +40,14 @@ def g3(batch_id, x, y, color):
     return div
 
 
-def g4(batch_id, x1, y1, x2, y2, color):
+def g4(batch_id, x, y, z, color):
     import plotly.express as px
     import plotly.offline as opy
 
     input_model = models.BatchInput(batch_id)
     df = input_model.as_pandas_dataframe()
 
-    fig = px.scatter_matrix(df, dimensions=[x1, y1, x2, y2], color=color)
+    fig = px.scatter_matrix(df, dimensions=[x, y, z], color=color)
     div = opy.plot(fig, auto_open=False, output_type='div')
 
     return div
@@ -72,6 +72,9 @@ def g6(batch_id, x, y, color, line_group):
 
     input_model = models.BatchInput(batch_id)
     df = input_model.as_pandas_dataframe()
+
+    # sorting data frame by name
+    df.sort_values(line_group, axis=0, ascending=True, inplace=True, na_position='last')
 
     fig = px.area(df, x=x, y=y, color=color, line_group=line_group)
     div = opy.plot(fig, auto_open=False, output_type='div')
@@ -105,15 +108,14 @@ def g8(batch_id, x, y):
     return div
 
 
-def g9(batch_id, x, y):
+def g9(batch_id, x, y, color):
     import plotly.express as px
     import plotly.offline as opy
 
     input_model = models.BatchInput(batch_id)
     df = input_model.as_pandas_dataframe()
 
-    tips = px.data.tips()
-    fig = px.histogram(df, x=x, y=y, color=color, marginal="rug", hover_data=tips.columns)
+    fig = px.histogram(df, x=x, y=y, color=color, marginal="rug", hover_data=[x, y, color])
     div = opy.plot(fig, auto_open=False, output_type='div')
 
     return div
@@ -126,8 +128,7 @@ def g10(batch_id, x, y, z, color):
     input_model = models.BatchInput(batch_id)
     df = input_model.as_pandas_dataframe()
 
-    fig = px.scatter_3d(df, x=x, y=y, z=z, color=color, size="total",
-        hover_name="district", symbol="result",
+    fig = px.scatter_3d(df, x=x, y=y, z=z, color=color,
         color_discrete_map={"Joly": "blue", "Bergeron": "green", "Coderre": "red"})
     div = opy.plot(fig, auto_open=False, output_type='div')
 

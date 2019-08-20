@@ -1,18 +1,40 @@
+# for precompiled tensorflow
 wheel
+
+# django
 django==2.2.4
+
+# for auth
 django-allauth==0.39.1
+
+# for addClass in templates
 django-widget-tweaks==1.4.5
-#django-viewflow
+
+# for materializecss
 django-material==1.5.8
+
+# for datatables
 django-datatables-view
+
+# for export csv, xls
 django-queryset-csv
 django-excel-response
-#django-export-xls
+
+# for save to SQL
 mysqlclient
 SQLAlchemy
+
+# for JSON in MYSQL
 jsonfield
+
+# for load xls, csv and save to SQL
 xlrd
 pandas
 numpy
+
+# for TensorBoard
 tensorflow==1.13.1
+
+# for Graph
 plotly
+statsmodels

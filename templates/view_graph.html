@@ -2,14 +2,7 @@
 {% load static %}
 
 {% block view %}
-
 <div>
-    <style>
-    .row {
-        margin-bottom: 0;
-    }
-    </style>
-
     <div class="col s3">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -21,38 +14,24 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col s4">
+                <div class="col s6">
                     {{ form.X.label_tag }}
                     {{ form.X }}
                 </div>
-                <div class="col s4">
+                <div class="col s6">
                     {{ form.Y.label_tag }}
                     {{ form.Y }}
                 </div>
-                <div class="col s4">
+            </div>
+            <div class="row">
+                <div class="col s6">
                     {{ form.Z.label_tag }}
                     {{ form.Z }}
                 </div>
-            </div>
-            <div class="row">
-                <div class="col s12">
+                <div class="col s6">
                     {{ form.color.errors }}
                     {{ form.color.label_tag }}
                     {{ form.color }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col s12">
-                    {{ form.Animation_Frame.errors }}
-                    {{ form.Animation_Frame.label_tag }}
-                    {{ form.Animation_Frame }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col s12">
-                    {{ form.ColorScales.errors }}
-                    {{ form.ColorScales.label_tag }}
-                    {{ form.ColorScales }}
                 </div>
             </div>
 

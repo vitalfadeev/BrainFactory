@@ -182,7 +182,7 @@ def send3(request, batch_id):
 
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/send3/{}'.format(batch.Batch_Id))
+            return HttpResponseRedirect('/view/{}'.format(batch.Batch_Id))
 
     # GET
     else:
@@ -476,18 +476,24 @@ class GraphView(FormView):
         from . import graphs
 
         self.batch_id = batch_id
+        batch = models.Batchs.objects.get(Batch_Id=batch_id, User_ID=request.user)
+
         try:
             instance = models.Graphs.objects.get(Batch_Id=batch_id)
-            form = self.form_class(batch_id, instance=instance)
+            form = self.form_class(batch, instance=instance)
             GraphType = instance.GraphType
             x = instance.X
             y = instance.Y
+            z = instance.Z
             color = instance.color
 
         except models.Graphs.DoesNotExist:
-            form = self.form_class(batch_id, initial=self.initial)
+            form = self.form_class(batch, initial=self.initial)
+            GraphType = form.initial['GraphType']
             x = form.initial['X']
             y = form.initial['Y']
+            z = form.initial['Z']
+            color = None
 
         try:
             if GraphType == "1":
@@ -497,43 +503,27 @@ class GraphView(FormView):
             elif GraphType == "3":
                 graph_div = graphs.g3(batch_id, x, y, color)
             elif GraphType == "4":
-                x1 = ''
-                y1 = ''
-                x2 = ''
-                y2 = ''
-                graph_div = graphs.g4(batch_id, x1, y1, x2, y2, color)
+                graph_div = graphs.g4(batch_id, x, y, z, color)
             elif GraphType == "5":
                 graph_div = graphs.g5(batch_id, color)
             elif GraphType == "6":
-                line_group = ''
-                graph_div = graphs.g6(batch_id, x, y, color, line_group)
+                graph_div = graphs.g6(batch_id, x, y, color, z)
             elif GraphType == "7":
                 graph_div = graphs.g7(batch_id, x, y)
             elif GraphType == "8":
                 graph_div = graphs.g8(batch_id, x, y)
             elif GraphType == "9":
-                graph_div = graphs.g9(batch_id, x, y)
+                graph_div = graphs.g9(batch_id, x, y, color)
             elif GraphType == "10":
-                z = ''
                 graph_div = graphs.g10(batch_id, x, y, z, color)
             else:
                 graph_div = ''
 
-        except ValueError:
-            graph_div = """<div class="valign-wrapper">
-                                <div class="center-align">
-                                    error
-                                </div>
-                            </div>
-                        """
-
-        except:
-            graph_div = """<div class="valign-wrapper">
-                                <div class="center-align">
-                                    error
-                                </div>
-                            </div>
-                        """
+        except Exception as e:
+            graph_div = """<div class="card-panel yellow lighten-5">
+                            {}
+                           </div>
+                        """.format(repr(e))
 
         context = {
             'form': form,
@@ -545,18 +535,18 @@ class GraphView(FormView):
 
     def post(self, request, batch_id, *args, **kwargs):
         self.batch_id = batch_id
+        batch = models.Batchs.objects.get(Batch_Id=batch_id, User_ID=request.user)
 
         try:
             instance = models.Graphs.objects.get(Batch_Id=batch_id)
-            form = self.form_class(batch_id, request.POST)
+            form = self.form_class(batch, request.POST)
 
         except models.Graphs.DoesNotExist:
-            form = self.form_class(batch_id, request.POST)
+            form = self.form_class(batch, request.POST)
 
 
         if form.is_valid():
             instance = form.save(commit=False)
-            batch = models.Batchs.objects.get(Batch_Id=batch_id)
             instance.Batch_Id = batch
             instance.save()
             url = self.get_success_url()

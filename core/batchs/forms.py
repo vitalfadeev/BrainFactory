@@ -257,8 +257,8 @@ class GraphForm(forms.ModelForm):
             'Y',
             'Z',
             'color',
-            'Animation_Frame',
-            'ColorScales',
+            #'Animation_Frame',
+            #'ColorScales',
         )
         fields_required = []
         labels = {
@@ -267,22 +267,24 @@ class GraphForm(forms.ModelForm):
             'Y'                 :'Y',
             'Z'                 :'Z',
             'color'             :'color',
-            'Animation_Frame'   :'Animation Frame',
-            'ColorScales'       :'ColorScales',
+            #'Animation_Frame'   :'Animation Frame',
+            #'ColorScales'       :'ColorScales',
         }
 
-    def __init__(self, batch_id, *args, **kwargs):
+    def __init__(self, batch, *args, **kwargs):
         super(GraphForm, self).__init__(*args, **kwargs)
 
-        model = models.BatchInput(batch_id)
-
-        columns = self._get_choices_fields(model)
-        color_columns = self._get_color_columns(model, batch_id)
+        columns = [(col, col) for col in batch.titles]
+        color_columns = [(col, col) for (col, typ) in zip(batch.titles, batch.types) if typ in ['OPTION', 'BINARY'] ]
 
         self.fields['X'] = forms.ChoiceField(choices = columns)
         self.fields['Y'] = forms.ChoiceField(choices = columns)
         self.fields['Z'] = forms.ChoiceField(choices = columns)
-        self.fields['color'] = forms.ChoiceField(choices = columns)
+
+        if color_columns:
+            self.fields['color'] = forms.ChoiceField(choices = color_columns)
+        else:
+            self.fields['color'] = forms.CharField(max_length=255)
 
         if 'instance' not in kwargs:
             if len(columns) >= 1:
@@ -293,27 +295,7 @@ class GraphForm(forms.ModelForm):
                 self.initial['Z'] = columns[2][0]
             if len(color_columns) >= 1:
                 self.initial['color'] = color_columns[0][0]
-
-
-    def _get_choices_fields(self, model):
-        #flds = model.get_field_names(without_pk=True)
-        cols = model.get_column_names(without_pk=True)
-        return list(zip(cols, cols))
-
-
-    def _get_color_columns(self, model, batch_id):
-        batch = models.Batchs.objects.get(Batch_Id=batch_id)
-        types = batch.types
-
-        # type only: 'OPTION', 'BINARY'
-        columns = batch.titles
-        color_columns = [col for col in columns if col in ['OPTION', 'BINARY'] ]
-
-        # inputs only
-        #inputs = batch.input_columns
-        #color_columns = [ col for col in color_columns if col in inputs ]
-
-        return color_columns
+            self.initial['GraphType'] = "1"
 
 
     #def is_valid(self, *args, **kwargs):
