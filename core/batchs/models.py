@@ -307,5 +307,5 @@ class Graphs(models.Model):
     Y               = models.CharField(max_length=255, default='')
     Z               = models.CharField(max_length=255, default='')
     color           = models.CharField(max_length=255, default='#ccc')
-    #Animation_Frame = models.CharField(max_length=255, default="1")
+    #Animation_Frame = models.CharField(max_length=255, default="")
     ColorScales     = models.CharField(max_length=255, default='1', choices=COLORSET_CHOICES)

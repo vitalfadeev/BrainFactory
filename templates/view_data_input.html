@@ -8,6 +8,7 @@
 <style>
 #data-input-table {
     white-space: nowrap;
+    width: 100%;
     /* table-layout: fixed; */
 }
 </style>
@@ -22,7 +23,7 @@
             </div>
             {% endif %}
 
-            <table class="" id="data-input-table" style="width:100%;">
+            <table class="" id="data-input-table" style="white-space: nowrap; min-height:129px; width:100%;">
                 <thead>
                 <tr id="row-titles">
                     {% for t in titles %}
