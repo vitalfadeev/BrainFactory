@@ -337,7 +337,10 @@ def redirect_view(request, prefix=None, tail=None, batch_id=None):
 
 class ProjectView(DetailView):
     def get(self, request, batch_id, *args, **kwargs):
+        batch = models.Batchs.objects.get(Batch_Id=batch_id, User_ID=request.user)
+
         context = {
+            "batch": batch,
             "batch_id": batch_id,
             'url_name': resolve(request.path_info).url_name,
         }
@@ -350,15 +353,7 @@ class DataInputView(DetailView):
         from . import models
 
         # check access
-        batch = models.Batchs.objects.get(Batch_Id=batch_id)
-
-        if batch.Project_IsPublic:
-            pass
-        else:
-            if batch.User_ID == request.user:
-                pass
-            else:
-                raise Http404
+        batch = models.Batchs.objects.get(Batch_Id=batch_id, User_ID=request.user)
 
         # input
         titles = batch.titles
@@ -401,7 +396,10 @@ class DataInputView(DetailView):
 
 class DataSolvingView(DetailView):
     def get(self, request, batch_id, *args, **kwargs):
+        batch = models.Batchs.objects.get(Batch_Id=batch_id, User_ID=request.user)
+
         context = {
+            "batch": batch,
             "batch_id": batch_id,
             'url_name': resolve(request.path_info).url_name,
         }
@@ -414,15 +412,7 @@ class SolvingView(DetailView):
         from . import models
 
         # check access
-        batch = models.Batchs.objects.get(Batch_Id=batch_id)
-
-        if batch.Project_IsPublic:
-            pass
-        else:
-            if batch.User_ID == request.user:
-                pass
-            else:
-                raise Http404
+        batch = models.Batchs.objects.get(Batch_Id=batch_id, User_ID=request.user)
 
         # render
         # input
